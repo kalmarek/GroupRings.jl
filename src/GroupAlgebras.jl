@@ -158,6 +158,7 @@ function scalar_multiplication{T<:Number, S<:Number}(a::T,
     X::GroupRingElem{S})
     promote_type(T,S) == S || warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
     return GroupRingElem(a*X.coeffs, parent(X))
+   end
 end
 
 (*){T<:Number}(a::T,X::GroupRingElem) = scalar_multiplication(a, X)
@@ -280,3 +281,5 @@ function complete(X::GroupRingElem)
    complete(parent(X))
    return X
 end
+
+end # of module GroupRings
