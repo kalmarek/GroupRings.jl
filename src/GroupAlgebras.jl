@@ -17,18 +17,14 @@ type GroupRing <: Ring
 
    GroupRing(G::Group) = new(G)
 end
-immutable GroupAlgebraElement{T<:Number}
-    coefficients::AbstractVector{T}
-    product_matrix::Array{Int,2}
-    # basis::Array{Any,1}
 
-    function GroupAlgebraElement(coefficients::AbstractVector,
-        product_matrix::Array{Int,2})
+type GroupRingElem{T<:Number}
+   coeffs::AbstractVector{T}
+   parent::GroupRing
 
-        size(product_matrix, 1) == size(product_matrix, 2) ||
-            throw(ArgumentError("Product matrix has to be square"))
-        new(coefficients, product_matrix)
-    end
+   function GroupRingElem(coeffs::AbstractVector)
+      return new(coeffs)
+   end
 end
 
 # GroupAlgebraElement(c,pm,b) = GroupAlgebraElement(c,pm)
