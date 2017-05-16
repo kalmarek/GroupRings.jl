@@ -179,22 +179,15 @@ end
 (*)(X::GroupRingElem, Y::GroupRingElem) = group_star_multiplication(X,Y)
 
 
+length(X::GroupRingElem) = length(X.coeffs)
+
+norm(X::GroupRingElem, p=2) = norm(X.coeffs, p)
+
+augmentation(X::GroupRingElem) = sum(X.coeffs)
 
 
-
-length(X::GroupAlgebraElement) = length(X.coefficients)
-
-function norm(X::GroupAlgebraElement, p=2)
-    if p == 1
-        return sum(abs(X.coefficients))
-    elseif p == Inf
-        return max(abs(X.coefficients))
-    else
-        return norm(X.coefficients, p)
-    end
 end
 
-ɛ(X::GroupAlgebraElement) = sum(X.coefficients)
 
 function rationalize{T<:Integer, S<:Number}(
     ::Type{T}, X::GroupAlgebraElement{S}; tol=eps(S))
