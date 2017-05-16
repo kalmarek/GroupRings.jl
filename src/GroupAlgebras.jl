@@ -1,5 +1,8 @@
 module GroupAlgebras
 
+using Nemo
+import Nemo: Group, GroupElem, Ring
+
 import Base: convert, show, isequal, ==
 import Base: +, -, *, //
 import Base: size, length, norm, rationalize
