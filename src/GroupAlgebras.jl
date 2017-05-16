@@ -107,8 +107,27 @@ function (==)(A::GroupRing, B::GroupRing)
    return A.group == B.group
 end
 
+
+(-)(X::GroupRingElem) = GroupRingElem(-X.coeffs, parent(X))
+
+(*){T<:Number}(a::T, X::GroupRingElem{T}) = GroupRingElem(
+    a*X.coeffs, parent(X))
+
+function scalar_multiplication{T<:Number, S<:Number}(a::T,
+    X::GroupRingElem{S})
+    promote_type(T,S) == S || warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
+    return GroupRingElem(a*X.coeffs, parent(X))
 end
 
+(*){T<:Number}(a::T,X::GroupRingElem) = scalar_multiplication(a, X)
+
+(/){T<:Number}(a::T, X::GroupRingElem) = scalar_multiplication(1/a, X)
+
+(//){T<:Rational, S<:Rational}(X::GroupRingElem{T}, a::S) =
+    GroupRingElem(X.coeffs//a, parent(X))
+
+(//){T<:Rational, S<:Integer}(X::GroupRingElem{T}, a::S) =
+    X//convert(T,a)
 
 
 function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
@@ -125,7 +144,6 @@ function add{T<:Number, S<:Number}(X::GroupRingElem{T},
     return GroupRingElem(+(promote(X.coeffs, Y.coeffs)...), parent(X))
 end
 
-(-)(X::GroupAlgebraElement) = GroupAlgebraElement(-X.coefficients, X.product_matrix)
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
@@ -160,22 +178,9 @@ end
 
 (*)(X::GroupRingElem, Y::GroupRingElem) = group_star_multiplication(X,Y)
 
-(*){T<:Number}(a::T, X::GroupAlgebraElement{T}) = GroupAlgebraElement(
-    a*X.coefficients, X.product_matrix)
 
-function scalar_multiplication{T<:Number, S<:Number}(a::T,
-    X::GroupAlgebraElement{S})
-    promote_type(T,S) == S || warn("Scalar and coefficients are in different rings! Promoting result to $(promote_type(T,S))")
-    return GroupAlgebraElement(a*X.coefficients, X.product_matrix)
-end
 
-(*){T<:Number}(a::T,X::GroupAlgebraElement) = scalar_multiplication(a, X)
 
-//{T<:Rational, S<:Rational}(X::GroupAlgebraElement{T}, a::S) =
-    GroupAlgebraElement(X.coefficients//a, X.product_matrix)
-
-//{T<:Rational, S<:Integer}(X::GroupAlgebraElement{T}, a::S) =
-    X//convert(T,a)
 
 length(X::GroupAlgebraElement) = length(X.coefficients)
 size(X::GroupAlgebraElement) = size(X.coefficients)
