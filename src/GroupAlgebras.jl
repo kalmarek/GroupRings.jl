@@ -9,7 +9,14 @@ import Base: size, length, norm, rationalize
 
 export GroupAlgebraElement
 
+type GroupRing <: Ring
+   group::Group
+   pm::Array{Int,2}
+   basis::Vector{GroupElem}
+   basis_dict::Dict{GroupElem, Int}
 
+   GroupRing(G::Group) = new(G)
+end
 immutable GroupAlgebraElement{T<:Number}
     coefficients::AbstractVector{T}
     product_matrix::Array{Int,2}
