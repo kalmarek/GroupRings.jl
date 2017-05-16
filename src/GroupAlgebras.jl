@@ -37,13 +37,6 @@ show{T}(io::IO, X::GroupAlgebraElement{T}) = print(io,
     "Element of Group Algebra over $T of length $(length(X)):\n $(X.coefficients)")
 
 
-function isequal{T, S}(X::GroupAlgebraElement{T}, Y::GroupAlgebraElement{S})
-    if T != S
-        warn("Comparing elements with different coefficients Rings!")
-    end
-    X.product_matrix == Y.product_matrix || return false
-    X.coefficients == Y.coefficients || return false
-    return true
 end
 
 (==)(X::GroupAlgebraElement, Y::GroupAlgebraElement) = isequal(X,Y)
