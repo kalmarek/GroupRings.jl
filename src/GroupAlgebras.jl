@@ -191,6 +191,8 @@ function rationalize{T<:Integer, S<:Number}(::Type{T}, X::GroupRingElem{S};
    return GroupRingElem(v, parent(X))
 end
 
+function reverse_dict(a::AbstractVector)
+   return Dict{eltype(a), Int}(x => i for (i,x) in enumerate(a))
 end
 
 
