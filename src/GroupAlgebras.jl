@@ -195,7 +195,37 @@ function reverse_dict(a::AbstractVector)
    return Dict{eltype(a), Int}(x => i for (i,x) in enumerate(a))
 end
 
-
+function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
+   limit; twisted=false)
+   product_matrix = zeros(Int, (limit,limit))
+   for i in 1:limit
+      x = basis([i])
+      if twisted
+         x = inv(x)
+      end
+      for j in 1:limit
+         w = x*basis[j]
+         product_matrix[i,j] = basis_dict[w]
+      end
+   end
+   return product_matrix
 end
 
+function complete(A::GroupRing)
+   isdefined(A, :basis) || A.basis = collect(elements(A.group))
+   isdefined(A, :basis_dict) || A.basis_dict = reverse_dict(A.basis)
+   if !isdefined(A, :pm)
+      A.pm = try
+         create_pm(basis, basis_dict)
+      catch err
+         isa(err, KeyError) && throw("Product is not supported on basis!"))
+         throw(err)
+      end
+   return A
+end
+
+function complete(X::GroupRingElem)
+   isdefined(X, :parent) || throw("You have to define parent of X before!")
+   complete(parent(X))
+   return X
 end
