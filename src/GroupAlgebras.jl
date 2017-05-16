@@ -7,7 +7,6 @@ import Base: convert, show, isequal, ==
 import Base: +, -, *, //
 import Base: size, length, norm, rationalize
 
-export GroupAlgebraElement
 
 type GroupRing <: Ring
    group::Group
@@ -27,6 +26,7 @@ type GroupRingElem{T<:Number}
    end
 end
 
+export GroupRing, GroupRingElem
 
 
 show{T}(io::IO, X::GroupAlgebraElement{T}) = print(io,
