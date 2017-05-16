@@ -185,14 +185,15 @@ norm(X::GroupRingElem, p=2) = norm(X.coeffs, p)
 
 augmentation(X::GroupRingElem) = sum(X.coeffs)
 
+function rationalize{T<:Integer, S<:Number}(::Type{T}, X::GroupRingElem{S};
+   tol=eps(S))
+   v = rationalize(T, X.coeffs, tol=tol)
+   return GroupRingElem(v, parent(X))
+end
 
 end
 
 
-function rationalize{T<:Integer, S<:Number}(
-    ::Type{T}, X::GroupAlgebraElement{S}; tol=eps(S))
-    v = rationalize(T, X.coefficients, tol=tol)
-    return GroupAlgebraElement(v, X.product_matrix)
 end
 
 end
