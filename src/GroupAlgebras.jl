@@ -29,6 +29,11 @@ end
 export GroupRing, GroupRingElem
 
 
+elem_type(::GroupRing) = GroupRingElem
+
+parent_type(::GroupRingElem) = GroupRing
+
+parent(g::GroupRingElem) = g.parent
 
 
 GroupRingElem{T}(c::AbstractVector{T}, A::GroupRing) = GroupRingElem{T}(c,A)
