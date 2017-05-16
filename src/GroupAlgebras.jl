@@ -63,6 +63,18 @@ function GroupRing(G::Group; complete=false)
    return A
 end
 
+
+function (A::GroupRing)(X::GroupRingElem)
+   length(X) == length(A.basis) || throw("Can not coerce to $A: lengths differ")
+   X.parent = A
+   return X
+end
+
+function (A::GroupRing)(x::AbstractVector)
+   length(x) == length(A.basis) || throw("Can not coerce to $A: lengths differ")
+   return GroupRingElem(x, A)
+end
+
 function show(io::IO, A::GroupRing)
    print(io, "GroupRing of $(A.group)")
 end
