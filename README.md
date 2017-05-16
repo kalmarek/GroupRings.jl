@@ -1,1 +1,1 @@
-# GroupAlgebras
+# GroupRings

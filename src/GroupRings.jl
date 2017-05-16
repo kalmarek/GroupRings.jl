@@ -1,4 +1,4 @@
-module GroupAlgebras
+module GroupRings
 
 using Nemo
 import Nemo: Group, GroupElem, Ring
