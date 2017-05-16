@@ -151,13 +151,12 @@ end
 
 (-)(X::GroupRingElem) = GroupRingElem(-X.coeffs, parent(X))
 
-(*){T<:Number}(a::T, X::GroupRingElem{T}) = GroupRingElem(
-    a*X.coeffs, parent(X))
+(*){T<:Number}(a::T, X::GroupRingElem{T}) = GroupRingElem(a*X.coeffs, parent(X))
 
 function scalar_multiplication{T<:Number, S<:Number}(a::T,
-    X::GroupRingElem{S})
-    promote_type(T,S) == S || warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
-    return GroupRingElem(a*X.coeffs, parent(X))
+   X::GroupRingElem{S})
+   promote_type(T,S) == S || warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
+      return GroupRingElem(a*X.coeffs, parent(X))
    end
 end
 
@@ -166,10 +165,10 @@ end
 (/){T<:Number}(a::T, X::GroupRingElem) = scalar_multiplication(1/a, X)
 
 (//){T<:Rational, S<:Rational}(X::GroupRingElem{T}, a::S) =
-    GroupRingElem(X.coeffs//a, parent(X))
+GroupRingElem(X.coeffs//a, parent(X))
 
 (//){T<:Rational, S<:Integer}(X::GroupRingElem{T}, a::S) =
-    X//convert(T,a)
+X//convert(T,a)
 
 ###############################################################################
 #
@@ -178,35 +177,36 @@ end
 ###############################################################################
 
 function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
-    parent(X) == parent(Y) || throw(ArgumentError(
-    "Elements don't seem to belong to the same Group Algebra!"))
-    return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
+   parent(X) == parent(Y) || throw(ArgumentError(
+   "Elements don't seem to belong to the same Group Algebra!"))
+   return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
 function add{T<:Number, S<:Number}(X::GroupRingElem{T},
-    Y::GroupRingElem{S})
-    parent(X) == parent(Y) || throw(ArgumentError(
-    "Elements don't seem to belong to the same Group Algebra!"))
-    warn("Adding elements with different base rings!")
-    return GroupRingElem(+(promote(X.coeffs, Y.coeffs)...), parent(X))
+   Y::GroupRingElem{S})
+   parent(X) == parent(Y) || throw(ArgumentError(
+   "Elements don't seem to belong to the same Group Algebra!"))
+   warn("Adding elements with different base rings!")
+   return GroupRingElem(+(promote(X.coeffs, Y.coeffs)...), parent(X))
 end
 
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function algebra_multiplication{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T}, pm::Array{Int,2})
-    result = zeros(X)
-    for (j,y) in enumerate(Y)
-        if y != zero(T)
-            for (i, index) in enumerate(pm[:,j])
-                if X[i] != zero(T)
-                    index == 0 && throw(ArgumentError("The product don't seem to belong to the span of basis!"))
-                    result[index] += X[i]*y
-                end
+function algebra_multiplication{T<:Number}(X::AbstractVector{T},
+   Y::AbstractVector{T}, pm::Array{Int,2})
+   result = zeros(X)
+   for (j,y) in enumerate(Y)
+      if y != zero(T)
+         for (i, index) in enumerate(pm[:,j])
+            if X[i] != zero(T)
+               index == 0 && throw(ArgumentError("The product don't seem to belong to the span of basis!"))
+               result[index] += X[i]*y
             end
-        end
-    end
-    return result
+         end
+      end
+   end
+   return result
 end
 
 function group_star_multiplication{T<:Number}(X::GroupRingElem{T},
