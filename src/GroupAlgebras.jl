@@ -29,8 +29,6 @@ end
 export GroupRing, GroupRingElem
 
 
-show{T}(io::IO, X::GroupAlgebraElement{T}) = print(io,
-    "Element of Group Algebra over $T of length $(length(X)):\n $(X.coefficients)")
 
 
 GroupRingElem{T}(c::AbstractVector{T}, A::GroupRing) = GroupRingElem{T}(c,A)
@@ -59,6 +57,16 @@ function GroupRing(G::Group; complete=false)
    end
    return A
 end
+
+function show(io::IO, A::GroupRing)
+   print(io, "GroupRing of $(A.group)")
+end
+
+function show(io::IO, X::GroupRingElem)
+   T = eltype(X.coeffs)
+   print(io, "Element of Group Algebra of $(parent(X)) over $T:\n $(X.coeffs)")
+end
+
 end
 
 (==)(X::GroupAlgebraElement, Y::GroupAlgebraElement) = isequal(X,Y)
