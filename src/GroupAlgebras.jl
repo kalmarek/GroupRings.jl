@@ -7,6 +7,11 @@ import Base: convert, show, isequal, ==
 import Base: +, -, *, //
 import Base: size, length, norm, rationalize
 
+###############################################################################
+#
+#   GroupRings / GroupRingsElem
+#
+###############################################################################
 
 type GroupRing <: Ring
    group::Group
@@ -28,6 +33,11 @@ end
 
 export GroupRing, GroupRingElem
 
+###############################################################################
+#
+#   Type and parent object methods
+#
+###############################################################################
 
 elem_type(::GroupRing) = GroupRingElem
 
@@ -35,6 +45,11 @@ parent_type(::GroupRingElem) = GroupRing
 
 parent(g::GroupRingElem) = g.parent
 
+###############################################################################
+#
+#   GroupRing / GroupRingElem constructors
+#
+###############################################################################
 
 GroupRingElem{T}(c::AbstractVector{T}, A::GroupRing) = GroupRingElem{T}(c,A)
 
@@ -63,6 +78,11 @@ function GroupRing(G::Group; complete=false)
    return A
 end
 
+###############################################################################
+#
+#   Parent object call overloads
+#
+###############################################################################
 
 function (A::GroupRing)(X::GroupRingElem)
    length(X) == length(A.basis) || throw("Can not coerce to $A: lengths differ")
@@ -75,6 +95,11 @@ function (A::GroupRing)(x::AbstractVector)
    return GroupRingElem(x, A)
 end
 
+###############################################################################
+#
+#   Basic manipulation
+#
+###############################################################################
 
 function deepcopy_internal(X::GroupRingElem, dict::ObjectIdDict)
    return GroupRingElem(deepcopy(X.coeffs), parent(X))
@@ -83,6 +108,12 @@ end
 function hash(X::GroupRingElem, h::UInt)
    return hash(X.coeffs, hash(parent(X), h))
 end
+
+###############################################################################
+#
+#   String I/O
+#
+###############################################################################
 
 function show(io::IO, A::GroupRing)
    print(io, "GroupRing of $(A.group)")
@@ -93,6 +124,11 @@ function show(io::IO, X::GroupRingElem)
    print(io, "Element of Group Algebra of $(parent(X)) over $T:\n $(X.coeffs)")
 end
 
+###############################################################################
+#
+#   Comparison
+#
+###############################################################################
 
 function (==)(X::GroupRingElem, Y::GroupRingElem)
    parent(X) == parent(Y) || return false
@@ -107,6 +143,11 @@ function (==)(A::GroupRing, B::GroupRing)
    return A.group == B.group
 end
 
+###############################################################################
+#
+#   Scalar operators
+#
+###############################################################################
 
 (-)(X::GroupRingElem) = GroupRingElem(-X.coeffs, parent(X))
 
@@ -129,6 +170,11 @@ end
 (//){T<:Rational, S<:Integer}(X::GroupRingElem{T}, a::S) =
     X//convert(T,a)
 
+###############################################################################
+#
+#   Binary operators
+#
+###############################################################################
 
 function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
     parent(X) == parent(Y) || throw(ArgumentError(
@@ -178,6 +224,11 @@ end
 
 (*)(X::GroupRingElem, Y::GroupRingElem) = group_star_multiplication(X,Y)
 
+###############################################################################
+#
+#   Misc
+#
+###############################################################################
 
 length(X::GroupRingElem) = length(X.coeffs)
 
