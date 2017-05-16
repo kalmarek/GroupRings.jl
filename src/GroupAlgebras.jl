@@ -144,23 +144,21 @@ function algebra_multiplication{T<:Number}(X::AbstractVector{T}, Y::AbstractVect
     return result
 end
 
-function group_star_multiplication{T<:Number}(X::GroupAlgebraElement{T},
-    Y::GroupAlgebraElement{T})
-    X.product_matrix == Y.product_matrix || ArgumentError(
-    "Elements don't seem to belong to the same Group Algebra!")
-    result = algebra_multiplication(X.coefficients, Y.coefficients, X.product_matrix)
-    return GroupAlgebraElement(result, X.product_matrix)
+function group_star_multiplication{T<:Number}(X::GroupRingElem{T},
+   Y::GroupRingElem{T})
+   parent(X) == parent(Y) || throw(ArgumentError(
+   "Elements don't seem to belong to the same Group Algebra!"))
+   result = algebra_multiplication(X.coeffs, Y.coeffs, X.pm)
+   return GroupRingElem(result, parent(X))
 end
 
 function group_star_multiplication{T<:Number, S<:Number}(
-    X::GroupAlgebraElement{T},
-    Y::GroupAlgebraElement{S})
-    S == T || warn("Multiplying elements with different base rings!")
-    return group_star_multiplication(promote(X,Y)...)
+   X::GroupRingElem{T}, Y::GroupRingElem{S})
+   warn("Multiplying elements with different base rings!")
+   return group_star_multiplication(promote(X,Y)...)
 end
 
-(*){T<:Number, S<:Number}(X::GroupAlgebraElement{T},
-    Y::GroupAlgebraElement{S}) = group_star_multiplication(X,Y);
+(*)(X::GroupRingElem, Y::GroupRingElem) = group_star_multiplication(X,Y)
 
 (*){T<:Number}(a::T, X::GroupAlgebraElement{T}) = GroupAlgebraElement(
     a*X.coefficients, X.product_matrix)
