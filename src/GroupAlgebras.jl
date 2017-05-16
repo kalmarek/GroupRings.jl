@@ -110,22 +110,24 @@ end
 end
 
 
-function add{T<:Number}(X::GroupAlgebraElement{T}, Y::GroupAlgebraElement{T})
-    X.product_matrix == Y.product_matrix || throw(ArgumentError(
+
+function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
+    parent(X) == parent(Y) || throw(ArgumentError(
     "Elements don't seem to belong to the same Group Algebra!"))
-    return GroupAlgebraElement(X.coefficients+Y.coefficients, X.product_matrix)
+    return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
-function add{T<:Number, S<:Number}(X::GroupAlgebraElement{T},
-    Y::GroupAlgebraElement{S})
+function add{T<:Number, S<:Number}(X::GroupRingElem{T},
+    Y::GroupRingElem{S})
+    parent(X) == parent(Y) || throw(ArgumentError(
+    "Elements don't seem to belong to the same Group Algebra!"))
     warn("Adding elements with different base rings!")
-    return GroupAlgebraElement(+(promote(X.coefficients, Y.coefficients)...),
-    X.product_matrix)
+    return GroupRingElem(+(promote(X.coeffs, Y.coeffs)...), parent(X))
 end
 
-(+)(X::GroupAlgebraElement, Y::GroupAlgebraElement) = add(X,Y)
 (-)(X::GroupAlgebraElement) = GroupAlgebraElement(-X.coefficients, X.product_matrix)
-(-)(X::GroupAlgebraElement, Y::GroupAlgebraElement) = add(X,-Y)
+(+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
+(-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
 function algebra_multiplication{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T}, pm::Array{Int,2})
     result = zeros(X)
