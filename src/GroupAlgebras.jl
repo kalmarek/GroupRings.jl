@@ -183,7 +183,6 @@ end
 
 
 length(X::GroupAlgebraElement) = length(X.coefficients)
-size(X::GroupAlgebraElement) = size(X.coefficients)
 
 function norm(X::GroupAlgebraElement, p=2)
     if p == 1
