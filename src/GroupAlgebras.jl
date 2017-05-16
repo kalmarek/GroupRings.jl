@@ -27,16 +27,16 @@ type GroupRingElem{T<:Number}
    end
 end
 
-# GroupAlgebraElement(c,pm,b) = GroupAlgebraElement(c,pm)
-GroupAlgebraElement{T}(c::AbstractVector{T},pm) = GroupAlgebraElement{T}(c,pm)
 
-convert{T<:Number}(::Type{T}, X::GroupAlgebraElement) =
-    GroupAlgebraElement(convert(AbstractVector{T}, X.coefficients), X.product_matrix)
 
 show{T}(io::IO, X::GroupAlgebraElement{T}) = print(io,
     "Element of Group Algebra over $T of length $(length(X)):\n $(X.coefficients)")
 
 
+GroupRingElem{T}(c::AbstractVector{T}, A::GroupRing) = GroupRingElem{T}(c,A)
+
+convert{T<:Number}(::Type{T}, X::GroupRingElem) =
+   GroupRingElem(parent(X), convert(AbstractVector{T}, X.coeffs))
 end
 
 (==)(X::GroupAlgebraElement, Y::GroupAlgebraElement) = isequal(X,Y)
