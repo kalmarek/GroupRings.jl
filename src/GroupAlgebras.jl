@@ -75,6 +75,15 @@ function (A::GroupRing)(x::AbstractVector)
    return GroupRingElem(x, A)
 end
 
+
+function deepcopy_internal(X::GroupRingElem, dict::ObjectIdDict)
+   return GroupRingElem(deepcopy(X.coeffs), parent(X))
+end
+
+function hash(X::GroupRingElem, h::UInt)
+   return hash(X.coeffs, hash(parent(X), h))
+end
+
 function show(io::IO, A::GroupRing)
    print(io, "GroupRing of $(A.group)")
 end
