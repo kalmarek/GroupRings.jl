@@ -93,9 +93,22 @@ function show(io::IO, X::GroupRingElem)
    print(io, "Element of Group Algebra of $(parent(X)) over $T:\n $(X.coeffs)")
 end
 
+
+function (==)(X::GroupRingElem, Y::GroupRingElem)
+   parent(X) == parent(Y) || return false
+   if eltype(X.coeffs) != eltype(S.coeffs)
+      warn("Comparing elements with different coeffs Rings!")
+   end
+   X.coeffs == Y.coeffs || return false
+   return true
 end
 
-(==)(X::GroupAlgebraElement, Y::GroupAlgebraElement) = isequal(X,Y)
+function (==)(A::GroupRing, B::GroupRing)
+   return A.group == B.group
+end
+
+end
+
 
 function add{T<:Number}(X::GroupAlgebraElement{T}, Y::GroupAlgebraElement{T})
     X.product_matrix == Y.product_matrix || throw(ArgumentError(
