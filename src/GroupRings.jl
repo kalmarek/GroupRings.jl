@@ -298,15 +298,20 @@ function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
 end
 
 function complete(A::GroupRing)
-   isdefined(A, :basis) || A.basis = collect(elements(A.group))
-   isdefined(A, :basis_dict) || A.basis_dict = reverse_dict(A.basis)
+   if !isdefined(A, :basis)
+      A.basis = collect(elements(A.group))
+   end
+   if !isdefined(A, :basis_dict)
+      A.basis_dict = reverse_dict(A.basis)
+   end
    if !isdefined(A, :pm)
       A.pm = try
-         create_pm(basis, basis_dict)
+         create_pm(A.basis, A.basis_dict)
       catch err
-         isa(err, KeyError) && throw("Product is not supported on basis!"))
+         isa(err, KeyError) && throw("Product is not supported on basis")
          throw(err)
       end
+   end
    return A
 end
 
