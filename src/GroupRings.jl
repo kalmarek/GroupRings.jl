@@ -157,11 +157,12 @@ function show(io::IO, A::GroupRing)
 end
 
 function show(io::IO, X::GroupRingElem)
-   if X == parent(X)()
+   T = eltype(X.coeffs)
+   if X == parent(X)(T)
       print(io, "0*$((parent(X).group)())")
    else
-      T = eltype(X.coeffs)
-      elts = ("$(X.coeffs[i])*$(parent(X).basis[i])" for i in 1:length(X) if X.coeffs[i] != zero(T))
+
+      elts = ("$(X[i])*$(parent(X).basis[i])" for i in 1:length(X) if X[i] != zero(T))
       join(io, elts, " + ")
    end
 end
