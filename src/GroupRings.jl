@@ -13,9 +13,9 @@ import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize,
 
 type GroupRing <: Ring
    group::Group
-   pm::Array{Int,2}
    basis::Vector{GroupElem}
    basis_dict::Dict{GroupElem, Int}
+   pm::Array{Int,2}
 
    function GroupRing(G::Group; full=false)
       A = new(G)
@@ -23,6 +23,10 @@ type GroupRing <: Ring
          complete(A)
       end
       return A
+   end
+
+   function GroupRing(G::Group, basis, basis_dict, pm::Array{Int,2})
+      return new(G, basis, basis_dict, pm)
    end
 end
 
