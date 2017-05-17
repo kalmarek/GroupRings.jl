@@ -83,6 +83,11 @@ end
 #
 ###############################################################################
 
+function (RG::GroupRing)(T::Type=Int)
+   isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
+   return GroupRingElem(spzeros(T,length(RG.basis)), RG)
+end
+
 function (A::GroupRing)(X::GroupRingElem)
    length(X) == length(A.basis) || throw("Can not coerce to $A: lengths differ")
    X.parent = A
