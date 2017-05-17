@@ -155,8 +155,13 @@ function show(io::IO, A::GroupRing)
 end
 
 function show(io::IO, X::GroupRingElem)
-   T = eltype(X.coeffs)
-   print(io, "Element of Group Algebra of $(parent(X)) over $T:\n $(X.coeffs)")
+   if X == parent(X)()
+      print(io, "0*$((parent(X).group)())")
+   else
+      T = eltype(X.coeffs)
+      elts = ("$(X.coeffs[i])*$(parent(X).basis[i])" for i in 1:length(X) if X.coeffs[i] != zero(T))
+      join(io, elts, " + ")
+   end
 end
 
 ###############################################################################
