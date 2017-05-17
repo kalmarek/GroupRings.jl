@@ -229,8 +229,18 @@ function groupring_mult!(X,Y,pm,result)
    return result
 end
 
-function group_star_multiplication{T<:Number}(X::GroupRingElem{T},
-   Y::GroupRingElem{T})
+function groupring_mult{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
+   pm::Array{Int,2})
+   result = zeros(X)
+   return groupring_mult!(X,Y,pm,result)
+end
+
+function groupring_mult(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
+   T = promote_type(eltype(X), eltype(Y))
+   result = zeros(T, X)
+   return groupring_mult!(X,Y,pm,result)
+end
+
    parent(X) == parent(Y) || throw(ArgumentError(
    "Elements don't seem to belong to the same Group Algebra!"))
    result = algebra_multiplication(X.coeffs, Y.coeffs, X.pm)
