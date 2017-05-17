@@ -160,6 +160,12 @@ function setindex!(X::GroupRingElem, value, g::GroupElem)
    X.coeffs[RG.basis_dict[g]] = value
 end
 
+function generators(RG::GroupRing)
+   S = generators(RG.group)
+   S = unique([S..., [inv(s) for s in S]...])
+   return [RG(s) for s in S]
+end
+
 ###############################################################################
 #
 #   String I/O
