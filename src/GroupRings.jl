@@ -241,19 +241,23 @@ function groupring_mult(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
    return groupring_mult!(X,Y,pm,result)
 end
 
+function groupring_mult{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    parent(X) == parent(Y) || throw(ArgumentError(
    "Elements don't seem to belong to the same Group Algebra!"))
-   result = algebra_multiplication(X.coeffs, Y.coeffs, X.pm)
+   result = groupring_mult(X.coeffs, Y.coeffs, parent(X).pm)
    return GroupRingElem(result, parent(X))
 end
 
-function group_star_multiplication{T<:Number, S<:Number}(
-   X::GroupRingElem{T}, Y::GroupRingElem{S})
+function groupring_mult{T<:Number, S<:Number}(X::GroupRingElem{T},
+      Y::GroupRingElem{S})
+   parent(X) == parent(Y) || throw("Elements don't seem to belong to the same
+   Group Ring!")
    warn("Multiplying elements with different base rings!")
-   return group_star_multiplication(promote(X,Y)...)
+   result = groupring_mult(promote(X.coeffs,Y.coeffs)..., parent(X).pm)
+   return GroupRingElem(result, parent(X))
 end
 
-(*)(X::GroupRingElem, Y::GroupRingElem) = group_star_multiplication(X,Y)
+(*)(X::GroupRingElem, Y::GroupRingElem) = groupring_mult(X,Y)
 
 ###############################################################################
 #
