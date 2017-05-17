@@ -291,7 +291,6 @@ end
 ###############################################################################
 
 function star(X::GroupRingElem)
-   isdefined(X, :parent) || throw("Define parent object for $X first")
    RG = parent(X)
    isdefined(RG, :basis) || complete(RG)
    result = RG()
