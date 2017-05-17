@@ -67,13 +67,12 @@ function GroupRingElem{T<:Number}(c::AbstractVector{T}, RG::GroupRing)
    return GroupRingElem{T}(c, RG)
 end
 
-convert{T<:Number}(::Type{T}, X::GroupRingElem) =
-   GroupRingElem(convert(AbstractVector{T}, X.coeffs), parent(X))
-
+function convert{T<:Number}(::Type{T}, X::GroupRingElem)
+   return GroupRingElem(convert(AbstractVector{T}, X.coeffs), parent(X))
+end
 
 function GroupRing(G::Group, pm::Array{Int,2})
-   size(pm,1) == size(pm,2) || throw("pm must be of size (n,n), got
-      $(size(pm))")
+   size(pm,1) == size(pm,2) || throw("pm must be square, got $(size(pm))")
    return GroupRing(G, pm)
 end
 
