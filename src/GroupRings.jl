@@ -151,7 +151,7 @@ end
 ###############################################################################
 
 function show(io::IO, A::GroupRing)
-   print(io, "GroupRing of $(A.group)")
+   print(io, "Group Ring of [$(A.group)]")
 end
 
 function show(io::IO, X::GroupRingElem)
