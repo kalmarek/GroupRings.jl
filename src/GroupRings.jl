@@ -1,11 +1,9 @@
 module GroupRings
 
 using Nemo
-import Nemo: Group, GroupElem, Ring
+import Nemo: Group, GroupElem, Ring, parent, elem_type, parent_type
 
-import Base: convert, show, isequal, ==
-import Base: +, -, *, //
-import Base: size, length, norm, rationalize
+import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize, deepcopy_internal
 
 ###############################################################################
 #
