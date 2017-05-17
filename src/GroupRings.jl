@@ -113,6 +113,25 @@ function hash(X::GroupRingElem, h::UInt)
    return hash(X.coeffs, hash(parent(X), h))
 end
 
+function getindex(X::GroupRingElem, n::Int)
+   return X.coeffs[n]
+end
+
+function getindex(X::GroupRingElem, g::GroupElem)
+   return X.coeffs[parent(X).basis_dict[g]]
+end
+
+function setindex!(X::GroupRingElem, k, n::Int)
+   X.coeffs[n] = k
+end
+
+function setindex!(X::GroupRingElem, k, g::GroupElem)
+   RG = parent(X)
+   typeof(g) == elem_type(RG.group) || throw("$g is not an element of $(RG.group)")
+   g = (RG.group)(g)
+   X.coeffs[RG.basis_dict[g]] = k
+end
+
 ###############################################################################
 #
 #   String I/O
