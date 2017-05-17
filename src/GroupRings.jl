@@ -155,7 +155,7 @@ end
 
 function (==)(X::GroupRingElem, Y::GroupRingElem)
    parent(X) == parent(Y) || return false
-   if eltype(X.coeffs) != eltype(S.coeffs)
+   if eltype(X.coeffs) != eltype(Y.coeffs)
       warn("Comparing elements with different coeffs Rings!")
    end
    X.coeffs == Y.coeffs || return false
