@@ -193,7 +193,7 @@ function (==)(X::GroupRingElem, Y::GroupRingElem)
    if eltype(X.coeffs) != eltype(Y.coeffs)
       warn("Comparing elements with different coeffs Rings!")
    end
-   X.coeffs == Y.coeffs || return false
+   all(X.coeffs .== Y.coeffs) || return false
    return true
 end
 
