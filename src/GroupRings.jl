@@ -29,6 +29,13 @@ end
 type GroupRingElem{T<:Number} <: RingElem
    coeffs::AbstractVector{T}
    parent::GroupRing
+
+   function GroupRingElem(c::AbstractVector{T}, RG::GroupRing)
+      isdefined(RG, :basis) || complete(RG)
+      length(c) == length(RG.basis) || throw("Can't create GroupRingElem -- lengths differ: length(c) = $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
+
+      return new(c,RG)
+   end
 end
 
 export GroupRing, GroupRingElem
@@ -52,10 +59,7 @@ parent{T}(g::GroupRingElem{T}) = g.parent
 ###############################################################################
 
 function GroupRingElem{T<:Number}(c::AbstractVector{T}, RG::GroupRing)
-   isdefined(RG, :basis) || complete(RG)
-   length(c) == length(RG.basis) || throw("Can't create GroupRingElem -- lengths differ: length(c) = $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
-
-   GroupRingElem{T}(c,RG)
+   return GroupRingElem{T}(c, RG)
 end
 
 convert{T<:Number}(::Type{T}, X::GroupRingElem) =
