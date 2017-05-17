@@ -211,7 +211,7 @@ end
 # disallow Nemo.Rings to hijack *(::Integer, ::RingElem)
 (*){T<:Integer}(a::T, X::GroupRingElem) = scalar_mult(a, X)
 
-(/){T<:Number}(a::T, X::GroupRingElem) = scalar_multiplication(1/a, X)
+(/)(X::GroupRingElem, a) = scalar_mult(1/a, X)
 
 (//){T<:Rational, S<:Rational}(X::GroupRingElem{T}, a::S) =
    GroupRingElem(X.coeffs//a, parent(X))
