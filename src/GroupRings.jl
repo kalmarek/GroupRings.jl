@@ -53,7 +53,12 @@ parent{T}(g::GroupRingElem{T}) = g.parent
 #
 ###############################################################################
 
-GroupRingElem{T}(c::AbstractVector{T}, A::GroupRing) = GroupRingElem{T}(c,A)
+function GroupRingElem{T<:Number}(c::AbstractVector{T}, A::GroupRing)
+   length(c) == length(A.basis) || throw("Can't create GroupRingElem -- lengths
+   differ: length(c) = $(length(c)) != $(length(A.basis)) = length(A.basis)")
+
+   GroupRingElem{T}(c,A)
+end
 
 convert{T<:Number}(::Type{T}, X::GroupRingElem) =
    GroupRingElem(parent(X), convert(AbstractVector{T}, X.coeffs))
