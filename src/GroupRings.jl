@@ -205,7 +205,11 @@ function scalar_multiplication{T<:Number, S<:Number}(a::T,
    return GroupRingElem(a*X.coeffs, parent(X))
 end
 
-(*){T<:Number}(a::T,X::GroupRingElem) = scalar_multiplication(a, X)
+(*)(a, X::GroupRingElem) = scalar_mult(a, X)
+(*)(X::GroupRingElem, a) = a*X
+
+# disallow Nemo.Rings to hijack *(::Integer, ::RingElem)
+(*){T<:Integer}(a::T, X::GroupRingElem) = scalar_mult(a, X)
 
 (/){T<:Number}(a::T, X::GroupRingElem) = scalar_multiplication(1/a, X)
 
