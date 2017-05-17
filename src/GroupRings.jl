@@ -217,14 +217,14 @@ end
 
 function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    parent(X) == parent(Y) || throw(ArgumentError(
-   "Elements don't seem to belong to the same Group Algebra!"))
+   "Elements don't seem to belong to the same Group Ring!"))
    return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
 function add{T<:Number, S<:Number}(X::GroupRingElem{T},
    Y::GroupRingElem{S})
    parent(X) == parent(Y) || throw(ArgumentError(
-   "Elements don't seem to belong to the same Group Algebra!"))
+   "Elements don't seem to belong to the same Group Ring!"))
    warn("Adding elements with different base rings!")
    return GroupRingElem(+(promote(X.coeffs, Y.coeffs)...), parent(X))
 end
@@ -260,7 +260,7 @@ end
 
 function groupring_mult{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    parent(X) == parent(Y) || throw(ArgumentError(
-   "Elements don't seem to belong to the same Group Algebra!"))
+   "Elements don't seem to belong to the same Group Ring!"))
    result = groupring_mult(X.coeffs, Y.coeffs, parent(X).pm)
    return GroupRingElem(result, parent(X))
 end
