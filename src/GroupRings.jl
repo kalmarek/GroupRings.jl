@@ -26,7 +26,9 @@ type GroupRing <: Ring
    end
 end
 
-type GroupRingElem{T<:Number}
+abstract AbstractGroupRingElem
+
+type GroupRingElem{T<:Number} <: AbstractGroupRingElem
    coeffs::AbstractVector{T}
    parent::GroupRing
 
