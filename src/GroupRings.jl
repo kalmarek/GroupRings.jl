@@ -310,10 +310,4 @@ function complete(A::GroupRing)
    return A
 end
 
-function complete(X::GroupRingElem)
-   isdefined(X, :parent) || throw("You have to define parent of X before!")
-   complete(parent(X))
-   return X
-end
-
 end # of module GroupRings
