@@ -77,12 +77,23 @@ function GroupRing(G::Group, pm::Array{Int,2})
    return GroupRing(G, pm)
 end
 
-function GroupRing(G::Group, pm::Array{Int,2}, basis::Vector)
+function GroupRing(G::Group, basis::Vector)
+   basis_dict = reverse_dict(basis)
+   pm = try
+      create_pm(basis, basis_dict)
+   catch err
+      isa(err, KeyError) && throw("Products are not supported on basis")
+      throw(err)
+   end
+   return GroupRing(G, basis, basis_dict, pm)
+end
+
+function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
    size(pm,1) == size(pm,2) || throw("pm must be of size (n,n), got
       $(size(pm))")
    eltype(basis) == elem_type(G) || throw("basis must consist of elements of $G")
    basis_dict = reverse_dict(basis)
-   return GroupRing(Group, pm, basis, basis_dict)
+   return GroupRing(G, basis, basis_dict, pm)
 end
 
 ###############################################################################
