@@ -43,7 +43,7 @@ type GroupRingElem{T<:Number} <: RingElem
    end
 end
 
-export GroupRing, GroupRingElem
+export GroupRing, GroupRingElem, complete, create_pm
 
 ###############################################################################
 #
