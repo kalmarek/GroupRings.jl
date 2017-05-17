@@ -271,7 +271,7 @@ function groupring_mult{T<:Number, S<:Number}(X::GroupRingElem{T},
    parent(X) == parent(Y) || throw("Elements don't seem to belong to the same
    Group Ring!")
    warn("Multiplying elements with different base rings!")
-   result = groupring_mult(promote(X.coeffs,Y.coeffs)..., parent(X).pm)
+   result = groupring_mult(X.coeffs, Y.coeffs, parent(X).pm)
    return GroupRingElem(result, parent(X))
 end
 
