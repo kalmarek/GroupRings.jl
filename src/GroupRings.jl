@@ -1,7 +1,7 @@
 module GroupRings
 
 using Nemo
-import Nemo: Group, GroupElem, Ring, parent, elem_type, parent_type
+import Nemo: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type
 
 import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize, deepcopy_internal, getindex, setindex!
 
@@ -26,9 +26,7 @@ type GroupRing <: Ring
    end
 end
 
-abstract AbstractGroupRingElem
-
-type GroupRingElem{T<:Number} <: AbstractGroupRingElem
+type GroupRingElem{T<:Number} <: RingElem
    coeffs::AbstractVector{T}
    parent::GroupRing
 end
