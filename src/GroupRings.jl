@@ -34,11 +34,12 @@ type GroupRingElem{T<:Number} <: RingElem
    coeffs::AbstractVector{T}
    parent::GroupRing
 
-   function GroupRingElem(c::AbstractVector{T}, RG::GroupRing)
-      isdefined(RG, :basis) || complete(RG)
-      length(c) == length(RG.basis) || throw("Can't create GroupRingElem -- lengths differ: length(c) = $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
-
-      return new(c,RG)
+   function GroupRingElem(c::AbstractVector{T}, RG::GroupRing, check=true)
+      if check
+         isdefined(RG, :basis) || complete(RG)
+         length(c) == length(RG.basis) || throw("Can't create GroupRingElem -- lengths differ: length(c) = $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
+      end
+      return new(c, RG)
    end
 end
 
