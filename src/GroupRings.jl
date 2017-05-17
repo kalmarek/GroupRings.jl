@@ -338,8 +338,9 @@ function rationalize{T<:Integer, S<:Number}(::Type{T}, X::GroupRingElem{S};
    return GroupRingElem(v, parent(X))
 end
 
-function reverse_dict(a::AbstractVector)
-   return Dict{eltype(a), Int}(x => i for (i,x) in enumerate(a))
+function reverse_dict(iter)
+   T = eltype(iter)
+   return Dict{T, Int}(x => i for (i,x) in enumerate(iter))
 end
 
 function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
