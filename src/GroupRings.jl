@@ -63,6 +63,18 @@ end
 convert{T<:Number}(::Type{T}, X::GroupRingElem) =
    GroupRingElem(convert(AbstractVector{T}, X.coeffs), parent(X))
 
+function (RG::GroupRing)(g::GroupElem, T::Type=Int)
+   typeof(g) == elem_type(RG.group) || throw("$g does not belong to $(RG.group), the underlying group of $RG")
+      g = try
+         RG.group(g)
+      catch
+         throw("Can't coerce $g to the underlying group of $RG")
+      end
+      c = spzeros(T, length(RG.basis))
+      c[RG.basis_dict[g]] = one(T)
+      return GroupRingElem(c, RG)
+   end
+
 function GroupRing(G::Group, pm::Array{Int,2})
    size(pm,1) == size(pm,2) || throw("pm must be of size (n,n), got
       $(size(pm))")
