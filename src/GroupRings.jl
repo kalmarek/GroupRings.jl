@@ -31,10 +31,6 @@ abstract AbstractGroupRingElem
 type GroupRingElem{T<:Number} <: AbstractGroupRingElem
    coeffs::AbstractVector{T}
    parent::GroupRing
-
-   function GroupRingElem(coeffs::AbstractVector)
-      return new(coeffs)
-   end
 end
 
 export GroupRing, GroupRingElem
