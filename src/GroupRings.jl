@@ -279,6 +279,25 @@ end
 
 ###############################################################################
 #
+#   *-involution
+#
+###############################################################################
+
+function star(X::GroupRingElem)
+   isdefined(X, :parent) || throw("Define parent object for $X first")
+   RG = parent(X)
+   result = RG()
+   for (i,c) in enumerate(X.coeffs)
+      if c != zero(eltype(X.coeffs))
+         g = inv(RG.basis[i])
+         result[g] = c
+      end
+   end
+   return result
+end
+
+###############################################################################
+#
 #   Misc
 #
 ###############################################################################
