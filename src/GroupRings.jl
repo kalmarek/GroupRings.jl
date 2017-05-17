@@ -69,17 +69,6 @@ end
 convert{T<:Number}(::Type{T}, X::GroupRingElem) =
    GroupRingElem(convert(AbstractVector{T}, X.coeffs), parent(X))
 
-function (RG::GroupRing)(g::GroupElem, T::Type=Int)
-   typeof(g) == elem_type(RG.group) || throw("$g does not belong to $(RG.group), the underlying group of $RG")
-      g = try
-         RG.group(g)
-      catch
-         throw("Can't coerce $g to the underlying group of $RG")
-      end
-      c = spzeros(T, length(RG.basis))
-      c[RG.basis_dict[g]] = one(T)
-      return GroupRingElem(c, RG)
-   end
 
 function GroupRing(G::Group, pm::Array{Int,2})
    size(pm,1) == size(pm,2) || throw("pm must be of size (n,n), got
@@ -106,18 +95,26 @@ function (RG::GroupRing)(T::Type=Int)
    return GroupRingElem(spzeros(T,length(RG.basis)), RG)
 end
 
-function (RG::GroupRing)(X::GroupRingElem)
-   isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
-   length(X) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
-   X.parent = RG
-   return X
+function (RG::GroupRing)(g::GroupElem, T::Type=Int)
+   typeof(g) == elem_type(RG.group) || throw("$g does not belong to $(RG.group), the underlying group of $RG")
+   g = try
+      RG.group(g)
+   catch
+      throw("Can't coerce $g to the underlying group of $RG")
+   end
+   result = RG(T)
+   result[g] = one(T)
+   return result
 end
 
 function (RG::GroupRing)(x::AbstractVector)
-   isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
-   length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
-   return GroupRingElem(x, RG)
+   result = RG(eltype(x))
+   length(x) == length(result) || throw("Can not coerce to $RG: lengths differ")
+   result.coeffs = x
+   return result
 end
+
+(RG::GroupRing)(X::GroupRingElem) = RG(X.coeffs)
 
 ###############################################################################
 #
