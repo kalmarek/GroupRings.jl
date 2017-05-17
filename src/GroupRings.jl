@@ -243,13 +243,13 @@ function groupring_mult!(X,Y,pm,result)
          end
       end
    end
-   return result
 end
 
 function groupring_mult{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
    pm::Array{Int,2})
    result = zeros(X)
-   return groupring_mult!(X,Y,pm,result)
+   groupring_mult!(X,Y,pm,result)
+   return result
 end
 
 function groupring_mult(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
