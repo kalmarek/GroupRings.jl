@@ -197,7 +197,9 @@ function (==)(X::GroupRingElem, Y::GroupRingElem)
 end
 
 function (==)(A::GroupRing, B::GroupRing)
-   return A.group == B.group
+   A.group == B.group || return false
+   A.basis == B.basis || return false
+   return true
 end
 
 ###############################################################################
