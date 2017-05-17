@@ -215,13 +215,11 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function algebra_multiplication{T<:Number}(X::AbstractVector{T},
-   Y::AbstractVector{T}, pm::Array{Int,2})
-   result = zeros(X)
+function groupring_mult!(X,Y,pm,result)
    for (j,y) in enumerate(Y)
-      if y != zero(T)
+      if y != zero(eltype(Y))
          for (i, index) in enumerate(pm[:,j])
-            if X[i] != zero(T)
+            if X[i] != zero(eltype(X))
                index == 0 && throw(ArgumentError("The product don't seem to belong to the span of basis!"))
                result[index] += X[i]*y
             end
