@@ -296,12 +296,12 @@ end
 #
 ###############################################################################
 
-function star(X::GroupRingElem)
+function star{T}(X::GroupRingElem{T})
    RG = parent(X)
    isdefined(RG, :basis) || complete(RG)
-   result = RG()
+   result = RG(T)
    for (i,c) in enumerate(X.coeffs)
-      if c != zero(eltype(X.coeffs))
+      if c != zero(T)
          g = inv(RG.basis[i])
          result[g] = c
       end
