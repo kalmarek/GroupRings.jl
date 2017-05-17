@@ -282,15 +282,15 @@ function reverse_dict(a::AbstractVector)
 end
 
 function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
-   limit; twisted=false)
+   limit=length(basis); twisted=false)
    product_matrix = zeros(Int, (limit,limit))
    for i in 1:limit
-      x = basis([i])
+      x = basis[i]
       if twisted
          x = inv(x)
       end
       for j in 1:limit
-         w = x*basis[j]
+         w = x*(basis[j])
          product_matrix[i,j] = basis_dict[w]
       end
    end
