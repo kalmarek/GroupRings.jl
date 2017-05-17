@@ -160,11 +160,11 @@ end
 
 function show(io::IO, X::GroupRingElem)
    T = eltype(X.coeffs)
-   if X == parent(X)(T)
-      print(io, "0*$((parent(X).group)())")
+   RG = parent(X)
+   if X == RG(T)
+      print(io, "$(zero(T))*$((RG.group)())")
    else
-
-      elts = ("$(X[i])*$(parent(X).basis[i])" for i in 1:length(X) if X[i] != zero(T))
+      elts = ("$(X[i])*$(RG.basis[i])" for i in 1:length(X) if X[i] != zero(T))
       join(io, elts, " + ")
    end
 end
@@ -198,10 +198,8 @@ end
 
 (*){T<:Number}(a::T, X::GroupRingElem{T}) = GroupRingElem(a*X.coeffs, parent(X))
 
-function scalar_multiplication{T<:Number, S<:Number}(a::T,
-   X::GroupRingElem{S})
-   promote_type(T,S) == S || warn("Scalar and coeffs are in different rings!
-      Promoting result to $(promote_type(T,S))")
+function scalar_mult{T<:Number, S<:Number}(a::T, X::GroupRingElem{S})
+   promote_type(T,S) == S || warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
    return GroupRingElem(a*X.coeffs, parent(X))
 end
 
