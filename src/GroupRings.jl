@@ -135,15 +135,15 @@ function getindex(X::GroupRingElem, g::GroupElem)
    return X.coeffs[parent(X).basis_dict[g]]
 end
 
-function setindex!(X::GroupRingElem, k, n::Int)
-   X.coeffs[n] = k
+function setindex!(X::GroupRingElem, value, n::Int)
+   X.coeffs[n] = value
 end
 
-function setindex!(X::GroupRingElem, k, g::GroupElem)
+function setindex!(X::GroupRingElem, value, g::GroupElem)
    RG = parent(X)
    typeof(g) == elem_type(RG.group) || throw("$g is not an element of $(RG.group)")
    g = (RG.group)(g)
-   X.coeffs[RG.basis_dict[g]] = k
+   X.coeffs[RG.basis_dict[g]] = value
 end
 
 ###############################################################################
