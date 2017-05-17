@@ -43,9 +43,9 @@ export GroupRing, GroupRingElem
 
 elem_type(::GroupRing) = GroupRingElem
 
-parent_type(::GroupRingElem) = GroupRing
+parent_type{T}(::GroupRingElem{T}) = GroupRing
 
-parent(g::GroupRingElem) = g.parent
+parent{T}(g::GroupRingElem{T}) = g.parent
 
 ###############################################################################
 #
