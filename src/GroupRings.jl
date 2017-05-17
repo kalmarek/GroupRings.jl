@@ -73,7 +73,7 @@ function GroupRing(G::Group, pm::Array{Int,2}, basis::Vector)
    size(pm,1) == size(pm,2) || throw("pm must be of size (n,n), got
       $(size(pm))")
    eltype(basis) == elem_type(G) || throw("basis must consist of elements of $G")
-   basis_dict = Dict(g => i for (i,g) in enumerate(basis))
+   basis_dict = reverse_dict(basis)
    return GroupRing(Group, pm, basis, basis_dict)
 end
 
