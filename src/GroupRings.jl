@@ -17,7 +17,13 @@ type GroupRing <: Ring
    basis::Vector{GroupElem}
    basis_dict::Dict{GroupElem, Int}
 
-   GroupRing(G::Group) = new(G)
+   function GroupRing(G::Group; full=false)
+      A = new(G)
+      if full
+         complete(A)
+      end
+      return A
+   end
 end
 
 type GroupRingElem{T<:Number}
@@ -66,14 +72,6 @@ function GroupRing(G::Group, pm::Array{Int,2}, basis::Vector)
    eltype(basis) == elem_type(G) || throw("basis must consist of elements of $G")
    basis_dict = Dict(g => i for (i,g) in enumerate(basis))
    return GroupRing(Group, pm, basis, basis_dict)
-end
-
-function GroupRing(G::Group; complete=false)
-   A = GroupRing(Group)
-   if complete
-      complete(A)
-   end
-   return A
 end
 
 ###############################################################################
