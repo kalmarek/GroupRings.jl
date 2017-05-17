@@ -100,15 +100,17 @@ function (RG::GroupRing)(T::Type=Int)
    return GroupRingElem(spzeros(T,length(RG.basis)), RG)
 end
 
-function (A::GroupRing)(X::GroupRingElem)
-   length(X) == length(A.basis) || throw("Can not coerce to $A: lengths differ")
-   X.parent = A
+function (RG::GroupRing)(X::GroupRingElem)
+   isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
+   length(X) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
+   X.parent = RG
    return X
 end
 
-function (A::GroupRing)(x::AbstractVector)
-   length(x) == length(A.basis) || throw("Can not coerce to $A: lengths differ")
-   return GroupRingElem(x, A)
+function (RG::GroupRing)(x::AbstractVector)
+   isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
+   length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
+   return GroupRingElem(x, RG)
 end
 
 ###############################################################################
@@ -262,8 +264,10 @@ end
 function groupring_mult{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    parent(X) == parent(Y) || throw(ArgumentError(
    "Elements don't seem to belong to the same Group Ring!"))
-   result = groupring_mult(X.coeffs, Y.coeffs, parent(X).pm)
-   return GroupRingElem(result, parent(X))
+   RG = parent(X)
+   isdefined(RG, :pm) || complete(RG)
+   result = groupring_mult(X.coeffs, Y.coeffs, RG.pm)
+   return GroupRingElem(result, RG)
 end
 
 function groupring_mult{T<:Number, S<:Number}(X::GroupRingElem{T},
@@ -271,8 +275,10 @@ function groupring_mult{T<:Number, S<:Number}(X::GroupRingElem{T},
    parent(X) == parent(Y) || throw("Elements don't seem to belong to the same
    Group Ring!")
    warn("Multiplying elements with different base rings!")
-   result = groupring_mult(X.coeffs, Y.coeffs, parent(X).pm)
-   return GroupRingElem(result, parent(X))
+   RG = parent(X)
+   isdefined(RG, :pm) || complete(RG)
+   result = groupring_mult(X.coeffs, Y.coeffs, RG.pm)
+   return GroupRingElem(result, RG)
 end
 
 (*)(X::GroupRingElem, Y::GroupRingElem) = groupring_mult(X,Y)
@@ -286,6 +292,7 @@ end
 function star(X::GroupRingElem)
    isdefined(X, :parent) || throw("Define parent object for $X first")
    RG = parent(X)
+   isdefined(RG, :basis) || complete(RG)
    result = RG()
    for (i,c) in enumerate(X.coeffs)
       if c != zero(eltype(X.coeffs))
