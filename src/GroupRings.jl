@@ -366,6 +366,8 @@ function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
    return product_matrix
 end
 
+create_pm{T<:GroupElem}(b::Vector{T}) = create_pm(b, reverse_dict(b))
+
 function complete(A::GroupRing)
    if !isdefined(A, :basis)
       A.basis = collect(elements(A.group))
