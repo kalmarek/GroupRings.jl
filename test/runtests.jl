@@ -70,17 +70,28 @@ using Nemo
       @test isa(RG(G([2,3,1])), GroupRingElem)
       p = G([2,3,1])
       a = RG(p)
-      @test length(a) == 6
+      @test length(a) == 1
       @test isa(a.coeffs, SparseVector)
 
       @test a.coeffs[5] == 1
       @test a[5] == 1
       @test a[p] == 1
-      @test a[G([1,2,3])] == 0
 
       @test string(a) == "1*[2, 3, 1]"
 
       @test RG([0,0,0,0,1,0]) == a
+
+      s = G([1,2,3])
+      @test a[s] == 0
+      a[s] = 2
+
+      @test a.coeffs[1] == 2
+      @test a[1] == 2
+      @test a[s] == 2
+
+      @test string(a) == "2*[1, 2, 3] + 1*[2, 3, 1]"
+
+      @test length(a) == 2
    end
 
    @testset "Arithmetic" begin
@@ -128,7 +139,7 @@ using Nemo
          @test RG(ones(Int, order(G))) == sum(RG(g) for g in elements(G))
          a = RG(ones(Int, order(G)))
          b = sum((-1)^parity(g)*RG(g) for g in elements(G))
-
+         @test 1/2*(a+b).coeffs == [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
       end
 
       @testset "Multiplicative structure" begin
@@ -137,8 +148,20 @@ using Nemo
             b = RG(h)
             @test a*b == RG(g*h)
             @test (a+b)*(a+b) == a*a + a*b + b*a + b*b
-            @test 
          end
+
+         for g in elements(G)
+            @test GroupRings.star(RG(g)) == RG(inv(g))
+            @test (one(RG)-RG(g))*GroupRings.star(one(RG)-RG(g)) ==
+               2*one(RG) - RG(g) - RG(inv(g))
+            @test GroupRings.augmentation((one(RG)-RG(g))) == 0
+         end
+
+         z = sum((one(RG)-RG(g))*GroupRings.star(one(RG)-RG(g)) for g in elements(G))
+
+         @test GroupRings.augmentation(z) == 0
+
+         @test rationalize(Int, z) == convert(Rational{Int}, z)
       end
 
    end
