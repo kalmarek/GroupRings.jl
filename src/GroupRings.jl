@@ -377,7 +377,7 @@ create_pm{T<:GroupElem}(b::Vector{T}) = create_pm(b, reverse_dict(b))
 
 function complete(A::GroupRing)
    if !isdefined(A, :basis)
-      A.basis = collect(elements(A.group))
+      A.basis = [elements(A.group)...]
    end
    if !isdefined(A, :basis_dict)
       A.basis_dict = reverse_dict(A.basis)
