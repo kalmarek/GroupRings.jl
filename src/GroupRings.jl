@@ -349,6 +349,10 @@ norm(X::GroupRingElem, p=2) = norm(X.coeffs, p)
 
 augmentation(X::GroupRingElem) = sum(X.coeffs)
 
+function rationalize{T<:Integer, S<:Integer}(::Type{T}, X::GroupRingElem{S})
+   return convert(Rational{T}, X)
+end
+
 function rationalize{T<:Integer, S<:Number}(::Type{T}, X::GroupRingElem{S};
    tol=eps(S))
    v = rationalize(T, X.coeffs, tol=tol)
