@@ -233,6 +233,12 @@ end
 
 (/)(X::GroupRingElem, a) = scalar_mult(1/a, X)
 
+function (//){T<:Integer, S<:Integer}(X::GroupRingElem{T}, a::S)
+   U = typeof(X[1]//a)
+   warn("Rational division: promoting result to $U")
+   return convert(U, X)//a
+end
+
 (//){T<:Rational, S<:Rational}(X::GroupRingElem{T}, a::S) =
    GroupRingElem(X.coeffs//a, parent(X))
 
