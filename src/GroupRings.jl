@@ -163,12 +163,6 @@ eltype(X::GroupRingElem) = eltype(X.coeffs)
 
 one(RG::GroupRing) = RG(RG.group())
 
-function generators(RG::GroupRing)
-   S = generators(RG.group)
-   S = unique([S..., [inv(s) for s in S]...])
-   return [RG(s) for s in S]
-end
-
 ###############################################################################
 #
 #   String I/O
