@@ -3,7 +3,7 @@ module GroupRings
 using Nemo
 import Nemo: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type
 
-import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize, deepcopy_internal, getindex, setindex!, eltype
+import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize, deepcopy_internal, getindex, setindex!, eltype, one
 
 ###############################################################################
 #
@@ -161,6 +161,8 @@ function setindex!(X::GroupRingElem, value, g::GroupElem)
 end
 
 eltype(X::GroupRingElem) = eltype(X.coeffs)
+
+one(RG::GroupRing) = RG(RG.group())
 
 function generators(RG::GroupRing)
    S = generators(RG.group)
