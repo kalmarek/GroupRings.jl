@@ -107,7 +107,6 @@ function (RG::GroupRing)(T::Type=Int)
 end
 
 function (RG::GroupRing)(g::GroupElem, T::Type=Int)
-   typeof(g) == elem_type(RG.group) || throw("$g does not belong to $(RG.group), the underlying group of $RG")
    g = try
       RG.group(g)
    catch
