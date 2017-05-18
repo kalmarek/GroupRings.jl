@@ -119,8 +119,8 @@ function (RG::GroupRing)(g::GroupElem, T::Type=Int)
 end
 
 function (RG::GroupRing)(x::AbstractVector)
+   length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    result = RG(eltype(x))
-   length(x) == length(result) || throw("Can not coerce to $RG: lengths differ")
    result.coeffs = x
    return result
 end
@@ -184,7 +184,7 @@ function show(io::IO, X::GroupRingElem)
    if X == RG(T)
       print(io, "$(zero(T))*$((RG.group)())")
    else
-      elts = ("$(X[i])*$(RG.basis[i])" for i in 1:length(X) if X[i] != zero(T))
+      elts = ("$(X[i])*$(RG.basis[i])" for i in 1:length(RG.basis) if X[i] != zero(T))
       join(io, elts, " + ")
    end
 end
@@ -341,7 +341,7 @@ end
 #
 ###############################################################################
 
-length(X::GroupRingElem) = length(X.coeffs)
+length(X::GroupRingElem) = countnz(X.coeffs)
 
 norm(X::GroupRingElem, p=2) = norm(X.coeffs, p)
 
