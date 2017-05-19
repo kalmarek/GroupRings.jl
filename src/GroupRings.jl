@@ -179,8 +179,9 @@ function show(io::IO, X::GroupRingElem)
    if X == RG(T)
       print(io, "$(zero(T))*$((RG.group)())")
    else
-      elts = ("$(X[i])*$(RG.basis[i])" for i in 1:length(RG.basis) if X[i] != zero(T))
-      join(io, elts, " + ")
+      non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findn(X.coeffs))
+      elts = ("$(sign(c)> 0? " + ": " - ")$(abs(c))*$g" for (c,g) in non_zeros)
+      join(io, elts, "")
    end
 end
 
