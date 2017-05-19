@@ -17,9 +17,9 @@ type GroupRing <: Ring
    basis_dict::Dict{GroupElem, Int}
    pm::Array{Int,2}
 
-   function GroupRing(G::Group; full=false)
+   function GroupRing(G::Group; initialise=true)
       A = new(G)
-      if full
+      if initialise
          complete(A)
       end
       return A
