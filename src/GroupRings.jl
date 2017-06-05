@@ -36,8 +36,13 @@ type GroupRingElem{T<:Number} <: RingElem
 
    function GroupRingElem(c::AbstractVector{T}, RG::GroupRing, check=true)
       if check
-         isdefined(RG, :basis) || complete(RG)
-         length(c) == length(RG.basis) || throw("Can't create GroupRingElem -- lengths differ: length(c) = $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
+         if isdefined(RG, :basis)
+            length(c) == length(RG.basis) || throw(
+            "Can't create GroupRingElem -- lengths differ: length(c) =
+            $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
+         else
+            warn("Basis of the GroupRing is not defined.")
+         end
       end
       return new(c, RG)
    end
@@ -73,7 +78,9 @@ end
 
 function GroupRing(G::Group, pm::Array{Int,2})
    size(pm,1) == size(pm,2) || throw("pm must be square, got $(size(pm))")
-   return GroupRing(G, pm)
+   RG = GroupRing(G, initialise=false)
+   RG.pm = pm
+   return RG
 end
 
 function GroupRing(G::Group, basis::Vector)
@@ -174,14 +181,17 @@ function show(io::IO, A::GroupRing)
 end
 
 function show(io::IO, X::GroupRingElem)
-   T = eltype(X.coeffs)
    RG = parent(X)
-   if X == RG(T)
+   if X.coeffs == zero(X.coeffs)
+      T = eltype(X.coeffs)
       print(io, "$(zero(T))*$((RG.group)())")
-   else
+   elseif isdefined(RG, :basis)
       non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findn(X.coeffs))
       elts = ("$(sign(c)> 0? " + ": " - ")$(abs(c))*$g" for (c,g) in non_zeros)
       join(io, elts, "")
+   else
+      warn("Basis of the parent Group is not defined, showing coeffs")
+      print(io, X.coeffs)
    end
 end
 
@@ -202,7 +212,12 @@ end
 
 function (==)(A::GroupRing, B::GroupRing)
    A.group == B.group || return false
-   A.basis == B.basis || return false
+   if isdefined(A, :basis) && isdefined(B, :basis)
+      A.basis == B.basis || return false
+   else
+      warn("Bases of GroupRings are not defined, comparing products mats.")
+   end
+   A.pm == B.pm || return false
    return true
 end
 
