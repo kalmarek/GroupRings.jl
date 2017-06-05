@@ -10,7 +10,7 @@ using Nemo
       @test isa(GroupRing(G), Nemo.Ring)
       @test isa(GroupRing(G), GroupRing)
 
-      RG = GroupRing(G)
+      RG = GroupRing(G, initialise=false)
       @test isdefined(RG, :pm) == false
       @test isdefined(RG, :basis) == false
       @test isdefined(RG, :basis_dict) == false
@@ -57,7 +57,7 @@ using Nemo
 
    @testset "GroupRingElems constructors/basic manipulation" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G, full=true)
+      RG = GroupRing(G, initialise=true)
       a = rand(6)
       @test isa(GroupRingElem(a, RG), GroupRingElem)
       @test isa(RG(a), GroupRingElem)
@@ -96,7 +96,7 @@ using Nemo
 
    @testset "Arithmetic" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G, full=true)
+      RG = GroupRing(G)
       a = RG(ones(Int, order(G)))
 
       @testset "scalar operators" begin
