@@ -135,7 +135,18 @@ function {Gr,T}(RG::GroupRing{Gr,T})(x::AbstractVector)
    return result
 end
 
-(RG::GroupRing)(X::GroupRingElem) = RG(X.coeffs)
+function (RG::GroupRing)(X::GroupRingElem)
+   RG == parent(X) || throw("Can not coerce!")
+   return RG(X.coeffs)
+end
+
+function (RG::GroupRing)(X::GroupRingElem, emb::Function)
+    result = RG(eltype(X.coeffs))
+    for g in parent(X).basis
+        result[emb(g)] = X[g]
+    end
+    return result
+end
 
 ###############################################################################
 #
@@ -166,8 +177,11 @@ end
 function setindex!(X::GroupRingElem, value, g::GroupElem)
    RG = parent(X)
    typeof(g) == elem_type(RG.group) || throw("$g is not an element of $(RG.group)")
-   g = (RG.group)(g)
-   X.coeffs[RG.basis_dict[g]] = value
+   if !(g in keys(RG.basis_dict))
+      g = (RG.group)(g)
+   else
+      X.coeffs[RG.basis_dict[g]] = value
+   end
 end
 
 eltype(X::GroupRingElem) = eltype(X.coeffs)
