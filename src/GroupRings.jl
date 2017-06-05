@@ -173,8 +173,11 @@ end
 function setindex!(X::GroupRingElem, value, g::GroupElem)
    RG = parent(X)
    typeof(g) == elem_type(RG.group) || throw("$g is not an element of $(RG.group)")
-   g = (RG.group)(g)
-   X.coeffs[RG.basis_dict[g]] = value
+   if !(g in keys(RG.basis_dict))
+      g = (RG.group)(g)
+   else
+      X.coeffs[RG.basis_dict[g]] = value
+   end
 end
 
 eltype(X::GroupRingElem) = eltype(X.coeffs)
