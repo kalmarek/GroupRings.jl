@@ -11,13 +11,13 @@ import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize,
 #
 ###############################################################################
 
-type GroupRing <: Ring
-   group::Group
-   basis::Vector{GroupElem}
-   basis_dict::Dict{GroupElem, Int}
+type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
+   group::Gr
+   basis::Vector{T}
+   basis_dict::Dict{T, Int}
    pm::Array{Int,2}
 
-   function GroupRing(G::Group; initialise=true)
+   function GroupRing(G::Gr; initialise=true)
       A = new(G)
       if initialise
          complete(A)
@@ -25,10 +25,14 @@ type GroupRing <: Ring
       return A
    end
 
-   function GroupRing(G::Group, basis, basis_dict, pm::Array{Int,2})
+   function GroupRing(G::Gr, basis::Vector{T}, basis_dict::Dict{T,Int}, pm::Array{Int,2})
       return new(G, basis, basis_dict, pm)
    end
 end
+
+GroupRing{Gr<:Group}(G::Gr;initialise=true) = GroupRing{Gr, elem_type(G)}(G, initialise=initialise)
+
+GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) = GroupRing{Gr, T}(G, b, b_d, pm)
 
 type GroupRingElem{T<:Number} <: RingElem
    coeffs::AbstractVector{T}
