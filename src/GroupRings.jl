@@ -131,7 +131,10 @@ function (RG::GroupRing)(x::AbstractVector)
    return result
 end
 
-(RG::GroupRing)(X::GroupRingElem) = RG(X.coeffs)
+function (RG::GroupRing)(X::GroupRingElem)
+   RG == parent(X) || throw("Can not coerce!")
+   return RG(X.coeffs)
+end
 
 ###############################################################################
 #
