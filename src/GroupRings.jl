@@ -136,6 +136,14 @@ function (RG::GroupRing)(X::GroupRingElem)
    return RG(X.coeffs)
 end
 
+function (RG::GroupRing)(X::GroupRingElem, emb::Function)
+    result = RG(eltype(X.coeffs))
+    for g in parent(X).basis
+        result[emb(g)] = X[g]
+    end
+    return result
+end
+
 ###############################################################################
 #
 #   Basic manipulation
