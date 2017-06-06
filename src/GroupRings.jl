@@ -245,18 +245,17 @@ end
 
 (*){T<:Number}(a::T, X::GroupRingElem{T}) = GroupRingElem(a*X.coeffs, parent(X))
 
-function scalar_mult{T<:Number, S<:Number}(a::T, X::GroupRingElem{S})
+function (*){T<:Number, S<:Number}(a::T, X::GroupRingElem{S})
    promote_type(T,S) == S || warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
    return GroupRingElem(a*X.coeffs, parent(X))
 end
 
-(*)(a, X::GroupRingElem) = scalar_mult(a, X)
 (*)(X::GroupRingElem, a) = a*X
 
 # disallow Nemo.Rings to hijack *(::Integer, ::RingElem)
-(*){T<:Integer}(a::T, X::GroupRingElem) = scalar_mult(a, X)
+(*){T<:Integer}(a::T, X::GroupRingElem) = a*X
 
-(/)(X::GroupRingElem, a) = scalar_mult(1/a, X)
+(/)(X::GroupRingElem, a) = 1/a*X
 
 function (//){T<:Integer, S<:Integer}(X::GroupRingElem{T}, a::S)
    U = typeof(X[1]//a)
