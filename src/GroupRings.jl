@@ -112,23 +112,23 @@ end
 #
 ###############################################################################
 
-function {Gr,T}(RG::GroupRing{Gr,T})(S::Type=Int)
+function (RG::GroupRing)(T::Type=Int)
    isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
-   return GroupRingElem(spzeros(S,length(RG.basis)), RG)
+   return GroupRingElem(spzeros(T,length(RG.basis)), RG)
 end
 
-function {Gr,T}(RG::GroupRing{Gr,T})(g::GroupElem, S::Type=Int)
+function (RG::GroupRing)(g::GroupElem, T::Type=Int)
    g = try
       RG.group(g)
    catch
       throw("Can't coerce $g to the underlying group of $RG")
    end
-   result = RG(S)
-   result[g] = one(S)
+   result = RG(T)
+   result[g] = one(T)
    return result
 end
 
-function {Gr,T}(RG::GroupRing{Gr,T})(x::AbstractVector)
+function (RG::GroupRing)(x::AbstractVector)
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    result = RG(eltype(x))
    result.coeffs = x
