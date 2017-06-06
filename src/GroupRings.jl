@@ -11,13 +11,13 @@ import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize,
 #
 ###############################################################################
 
-type GroupRing <: Ring
-   group::Group
-   basis::Vector{GroupElem}
-   basis_dict::Dict{GroupElem, Int}
+type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
+   group::Gr
+   basis::Vector{T}
+   basis_dict::Dict{T, Int}
    pm::Array{Int,2}
 
-   function GroupRing(G::Group; initialise=true)
+   function GroupRing(G::Gr; initialise=true)
       A = new(G)
       if initialise
          complete(A)
@@ -25,10 +25,14 @@ type GroupRing <: Ring
       return A
    end
 
-   function GroupRing(G::Group, basis, basis_dict, pm::Array{Int,2})
+   function GroupRing(G::Gr, basis::Vector{T}, basis_dict::Dict{T,Int}, pm::Array{Int,2})
       return new(G, basis, basis_dict, pm)
    end
 end
+
+GroupRing{Gr<:Group}(G::Gr;initialise=true) = GroupRing{Gr, elem_type(G)}(G, initialise=initialise)
+
+GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) = GroupRing{Gr, T}(G, b, b_d, pm)
 
 type GroupRingElem{T<:Number} <: RingElem
    coeffs::AbstractVector{T}
@@ -108,23 +112,23 @@ end
 #
 ###############################################################################
 
-function (RG::GroupRing)(T::Type=Int)
+function {Gr,T}(RG::GroupRing{Gr,T})(S::Type=Int)
    isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
-   return GroupRingElem(spzeros(T,length(RG.basis)), RG)
+   return GroupRingElem(spzeros(S,length(RG.basis)), RG)
 end
 
-function (RG::GroupRing)(g::GroupElem, T::Type=Int)
+function {Gr,T}(RG::GroupRing{Gr,T})(g::GroupElem, S::Type=Int)
    g = try
       RG.group(g)
    catch
       throw("Can't coerce $g to the underlying group of $RG")
    end
-   result = RG(T)
-   result[g] = one(T)
+   result = RG(S)
+   result[g] = one(S)
    return result
 end
 
-function (RG::GroupRing)(x::AbstractVector)
+function {Gr,T}(RG::GroupRing{Gr,T})(x::AbstractVector)
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    result = RG(eltype(x))
    result.coeffs = x
@@ -291,7 +295,8 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function mul!(X,Y,pm,result)
+function mul!{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
+   pm::Array{Int,2}, result::AbstractVector{T})
    for (j,y) in enumerate(Y)
       if y != zero(eltype(Y))
          for (i, index) in enumerate(pm[:,j])
