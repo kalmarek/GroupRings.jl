@@ -291,7 +291,7 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function groupring_mult!(X,Y,pm,result)
+function mul!(X,Y,pm,result)
    for (j,y) in enumerate(Y)
       if y != zero(eltype(Y))
          for (i, index) in enumerate(pm[:,j])
@@ -304,17 +304,17 @@ function groupring_mult!(X,Y,pm,result)
    end
 end
 
-function groupring_mult{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
+function mul{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
    pm::Array{Int,2})
    result = zeros(X)
-   groupring_mult!(X,Y,pm,result)
+   mul!(X,Y,pm,result)
    return result
 end
 
-function groupring_mult(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
+function mul(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
    T = promote_type(eltype(X), eltype(Y))
    result = zeros(T, deepcopy(X))
-   groupring_mult!(X, Y, pm, result)
+   mul!(X, Y, pm, result)
    return result
 end
 
@@ -323,7 +323,7 @@ function *{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    "Elements don't seem to belong to the same Group Ring!"))
    RG = parent(X)
    isdefined(RG, :pm) || complete(RG)
-   result = groupring_mult(X.coeffs, Y.coeffs, RG.pm)
+   result = mul(X.coeffs, Y.coeffs, RG.pm)
    return GroupRingElem(result, RG)
 end
 
@@ -333,7 +333,7 @@ function *{T<:Number, S<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{S})
    warn("Multiplying elements with different base rings!")
    RG = parent(X)
    isdefined(RG, :pm) || complete(RG)
-   result = groupring_mult(X.coeffs, Y.coeffs, RG.pm)
+   result = mul(X.coeffs, Y.coeffs, RG.pm)
    return GroupRingElem(result, RG)
 end
 
