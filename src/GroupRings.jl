@@ -247,17 +247,18 @@ end
 
 (-)(X::GroupRingElem) = GroupRingElem(-X.coeffs, parent(X))
 
-(*){T<:Number}(a::T, X::GroupRingElem{T}) = GroupRingElem(a*X.coeffs, parent(X))
+mul{T<:Number}(a::T, X::GroupRingElem{T}) = GroupRingElem(a*X.coeffs, parent(X))
 
-function (*){T<:Number, S<:Number}(a::T, X::GroupRingElem{S})
+function mul{T<:Number, S<:Number}(a::T, X::GroupRingElem{S})
    promote_type(T,S) == S || warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
    return GroupRingElem(a*X.coeffs, parent(X))
 end
 
-(*)(X::GroupRingElem, a) = a*X
+(*)(a, X::GroupRingElem) = mul(a,X)
+(*)(X::GroupRingElem, a) = mul(a,X)
 
 # disallow Nemo.Rings to hijack *(::Integer, ::RingElem)
-(*){T<:Integer}(a::T, X::GroupRingElem) = a*X
+(*){T<:Integer}(a::T, X::GroupRingElem) = mul(a,X)
 
 (/)(X::GroupRingElem, a) = 1/a*X
 
