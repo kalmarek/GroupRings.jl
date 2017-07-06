@@ -37,7 +37,7 @@ using Nemo
    @testset "GroupRing constructors FreeGroup" begin
       using Groups
       F = FreeGroup(3)
-      S = generators(F)
+      S = gens(F)
       append!(S, [inv(s) for s in S])
       S = unique(S)
 
