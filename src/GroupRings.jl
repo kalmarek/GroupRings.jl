@@ -62,7 +62,8 @@ export GroupRing, GroupRingElem, complete, create_pm
 
 elem_type(::GroupRing) = GroupRingElem
 
-parent_type{T}(::GroupRingElem{T}) = GroupRing
+parent_type(::GroupRingElem) = GroupRing
+parent_type(::Type{GroupRingElem}) = GroupRing
 
 parent{T}(g::GroupRingElem{T}) = g.parent
 
