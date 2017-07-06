@@ -17,7 +17,7 @@ type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    basis_dict::Dict{T, Int}
    pm::Array{Int,2}
 
-   function GroupRing(G::Gr; initialise=true)
+   function GroupRing{Gr, T}(G::Gr; initialise=true) where {Gr <: Group, T<:GroupElem}
       A = new(G)
       if initialise
          complete(A)
@@ -25,20 +25,21 @@ type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
       return A
    end
 
-   function GroupRing(G::Gr, basis::Vector{T}, basis_dict::Dict{T,Int}, pm::Array{Int,2})
-      return new(G, basis, basis_dict, pm)
+   function GroupRing{Gr, T}(G::Gr, b::Vector{T}, b_d::Dict{T, Int}, pm::Array{Int,2}) where {Gr <: Group, T<:GroupElem}
+      return new(G, b, b_d, pm)
    end
+
 end
 
-GroupRing{Gr<:Group}(G::Gr;initialise=true) = GroupRing{Gr, elem_type(G)}(G, initialise=initialise)
+GroupRing(G::Gr;initialise=true) where Gr <:Group = GroupRing{Gr, elem_type(G)}(G, initialise=initialise)
 
-GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) = GroupRing{Gr, T}(G, b, b_d, pm)
+GroupRing(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) where {Gr<:Group, T<:GroupElem} = GroupRing{Gr, T}(G, b, b_d, pm)
 
 type GroupRingElem{T<:Number} <: RingElem
    coeffs::AbstractVector{T}
    parent::GroupRing
 
-   function GroupRingElem(c::AbstractVector{T}, RG::GroupRing, check=true)
+   function GroupRingElem{T}(c::AbstractVector{T}, RG::GroupRing, check=true) where {T<:Number}
       if check
          if isdefined(RG, :basis)
             length(c) == length(RG.basis) || throw(
