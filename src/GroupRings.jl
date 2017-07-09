@@ -1,7 +1,7 @@
 module GroupRings
 
 using Nemo
-import Nemo: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type
+import Nemo: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, mul!, addeq!
 
 import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize, deepcopy_internal, getindex, setindex!, eltype, one, zero
 
@@ -281,6 +281,13 @@ end
 #
 ###############################################################################
 
+function addeq!{T}(X::GroupRingElem{T}, Y::GroupRingElem{T})
+   parent(X) == parent(Y) || throw(ArgumentError(
+   "Elements don't seem to belong to the same Group Ring!"))
+   X.coeffs .+= Y.coeffs
+   return X
+end
+
 function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    parent(X) == parent(Y) || throw(ArgumentError(
    "Elements don't seem to belong to the same Group Ring!"))
@@ -298,7 +305,7 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function mul!{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
+function mul!{T}(X::AbstractVector{T}, Y::AbstractVector{T},
    pm::Array{Int,2}, result::AbstractVector{T})
    for (j,y) in enumerate(Y)
       if y != zero(eltype(Y))
@@ -312,6 +319,11 @@ function mul!{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
    end
 end
 
+function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
+   mul!(X.coeffs, Y.coeffs, parent(X).pm, result.coeffs)
+   return result
+end
+
 function mul{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
    pm::Array{Int,2})
    result = zeros(X)
@@ -321,8 +333,8 @@ end
 
 function mul(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
    T = promote_type(eltype(X), eltype(Y))
-   result = zeros(T, deepcopy(X))
-   mul!(X, Y, pm, result)
+   result = zeros(T, X)
+   mul!(Vector{T}(X), Vector{T}(Y), pm, result)
    return result
 end
 
