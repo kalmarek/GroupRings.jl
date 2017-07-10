@@ -311,10 +311,11 @@ end
 
 function mul!{T}(X::AbstractVector{T}, Y::AbstractVector{T},
    pm::Array{Int,2}, result::AbstractVector{T})
+   z = zero(T)
    for (j,y) in enumerate(Y)
-      if y != zero(eltype(Y))
+      if y != z
          for (i, index) in enumerate(pm[:,j])
-            if X[i] != zero(eltype(X))
+            if X[i] != z
                index == 0 && throw(ArgumentError("The product don't seem to belong to the span of basis!"))
                result[index] += X[i]*y
             end
