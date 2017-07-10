@@ -113,6 +113,11 @@ end
 #
 ###############################################################################
 
+zero(RG::GroupRing, T::Type=Int) = RG(T)
+one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
+
+(RG::GroupRing)(i::Int, T::Type=Int) = i*one(RG, T)
+
 function (RG::GroupRing)(T::Type=Int)
    isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
    return GroupRingElem(spzeros(T,length(RG.basis)), RG)
@@ -186,9 +191,6 @@ function setindex!(X::GroupRingElem, value, g::GroupElem)
 end
 
 eltype(X::GroupRingElem) = eltype(X.coeffs)
-
-one(RG::GroupRing) = RG(RG.group())
-zero(RG::GroupRing) = RG()
 
 ###############################################################################
 #
