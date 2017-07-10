@@ -311,8 +311,7 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function mul!{T}(X::AbstractVector{T}, Y::AbstractVector{T},
-   pm::Array{Int,2}, result::AbstractVector{T})
+function mul!{T}(result::AbstractVector{T}, X::AbstractVector{T}, Y::AbstractVector{T}, pm::Array{Int,2})
    z = zero(T)
    for (j,y) in enumerate(Y)
       if y != z
@@ -328,21 +327,21 @@ end
 
 function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    result.coeffs *= 0
-   mul!(X.coeffs, Y.coeffs, parent(X).pm, result.coeffs)
+   mul!(result.coeffs, X.coeffs, Y.coeffs, parent(X).pm)
    return result
 end
 
 function mul{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
    pm::Array{Int,2})
    result = zeros(X)
-   mul!(X,Y,pm,result)
+   mul!(result, X, Y, pm)
    return result
 end
 
 function mul(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
    T = promote_type(eltype(X), eltype(Y))
    result = zeros(T, X)
-   mul!(Vector{T}(X), Vector{T}(Y), pm, result)
+   mul!(result, Vector{T}(X), Vector{T}(Y), pm)
    return result
 end
 
