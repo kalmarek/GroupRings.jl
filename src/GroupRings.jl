@@ -197,7 +197,7 @@ zero(RG::GroupRing) = RG()
 ###############################################################################
 
 function show(io::IO, A::GroupRing)
-   print(io, "Group Ring of [$(A.group)]")
+   print(io, "Group Ring of $(A.group)")
 end
 
 function show(io::IO, X::GroupRingElem)
@@ -208,10 +208,14 @@ function show(io::IO, X::GroupRingElem)
    elseif isdefined(RG, :basis)
       non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findn(X.coeffs))
       elts = ("$(sign(c)> 0? " + ": " - ")$(abs(c))*$g" for (c,g) in non_zeros)
-      join(io, elts, "")
+      str = join(elts, "")
+      if sign(first(non_zeros)[1]) > 0
+         str = str[4:end]
+      end
+      print(io, str)
    else
       warn("Basis of the parent Group is not defined, showing coeffs")
-      print(io, X.coeffs)
+      show(io, MIME("text/plain"), X.coeffs)
    end
 end
 
