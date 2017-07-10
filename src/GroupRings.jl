@@ -327,6 +327,7 @@ function mul!{T}(X::AbstractVector{T}, Y::AbstractVector{T},
 end
 
 function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
+   result.coeffs *= 0
    mul!(X.coeffs, Y.coeffs, parent(X).pm, result.coeffs)
    return result
 end
