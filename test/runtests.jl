@@ -53,6 +53,12 @@ using Nemo
       B = GroupRing(F, basis, d, pm)
       @test A == B
 
+      g = B()
+      s = S[2]
+      g[s] = 1
+      @test g == B(s)
+      @test g[s^2] == 0
+      @test_throws KeyError g[s^10]
    end
 
    @testset "GroupRingElems constructors/basic manipulation" begin
