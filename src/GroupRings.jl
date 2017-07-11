@@ -180,9 +180,8 @@ function setindex!(X::GroupRingElem, value, g::GroupElem)
    typeof(g) == elem_type(RG.group) || throw("$g is not an element of $(RG.group)")
    if !(g in keys(RG.basis_dict))
       g = (RG.group)(g)
-   else
-      X.coeffs[RG.basis_dict[g]] = value
    end
+   X.coeffs[RG.basis_dict[g]] = value
 end
 
 eltype(X::GroupRingElem) = eltype(X.coeffs)
