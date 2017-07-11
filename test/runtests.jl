@@ -112,6 +112,9 @@ using Nemo
          @test eltype(2.0*a) == typeof(2.0)
          @test (2.0*a).coeffs == 2.0.*(a.coeffs)
 
+         b = RG(1) + GroupRing.star(a)
+         @test a*b == mul!(a,a,b)
+
          @test isa(a/2, GroupRingElem)
          @test eltype(a/2) == typeof(1/2)
          @test (a/2).coeffs == 0.5*(a.coeffs)
