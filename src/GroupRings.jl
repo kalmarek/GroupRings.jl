@@ -65,7 +65,15 @@ elem_type(::GroupRing) = GroupRingElem
 parent_type(::GroupRingElem) = GroupRing
 parent_type(::Type{GroupRingElem}) = GroupRing
 
+eltype(X::GroupRingElem) = eltype(X.coeffs)
+
 parent{T}(g::GroupRingElem{T}) = g.parent
+
+Base.promote_rule{T<:Number,S<:Number}(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) = GroupRingElem{promote_type(T,S)}
+
+function convert{T<:Number}(::Type{T}, X::GroupRingElem)
+   return GroupRingElem(convert(AbstractVector{T}, X.coeffs), parent(X))
+end
 
 ###############################################################################
 #
@@ -75,10 +83,6 @@ parent{T}(g::GroupRingElem{T}) = g.parent
 
 function GroupRingElem{T<:Number}(c::AbstractVector{T}, RG::GroupRing)
    return GroupRingElem{T}(c, RG)
-end
-
-function convert{T<:Number}(::Type{T}, X::GroupRingElem)
-   return GroupRingElem(convert(AbstractVector{T}, X.coeffs), parent(X))
 end
 
 function GroupRing(G::Group, pm::Array{Int,2})
