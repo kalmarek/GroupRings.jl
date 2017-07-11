@@ -120,7 +120,7 @@ using Nemo
          @test eltype(2.0*a) == typeof(2.0)
          @test (2.0*a).coeffs == 2.0.*(a.coeffs)
 
-         b = RG(1) + GroupRing.star(a)
+         b = RG(1) + GroupRings.star(a)
          @test a*b == mul!(a,a,b)
 
          @test isa(a/2, GroupRingElem)
