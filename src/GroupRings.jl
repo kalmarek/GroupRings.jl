@@ -1,7 +1,7 @@
 module GroupRings
 
 using Nemo
-import Nemo: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, mul!, addeq!
+import Nemo: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, mul!, addeq!, divexact
 
 import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize, deepcopy_internal, getindex, setindex!, eltype, one, zero
 
@@ -368,6 +368,16 @@ function *{T<:Number, S<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{S})
    return GroupRingElem(result, RG)
 end
 
+function divexact{T}(X::GroupRingElem{T}, Y::GroupRingElem{T})
+   if length(Y) != 1
+      throw("Can not divide by a non-primitive element $(Y)!")
+   else
+      idx = findfirst(Y)
+      c = Y[idx]
+      g = parent(Y).basis[idx]
+      return X*1//c*parent(Y)(inv(g))
+   end
+end
 ###############################################################################
 #
 #   *-involution
