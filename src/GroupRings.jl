@@ -160,7 +160,7 @@ end
 
 ###############################################################################
 #
-#   Basic manipulation
+#   Basic manipulation && Array protocol
 #
 ###############################################################################
 
@@ -194,7 +194,8 @@ function setindex!(X::GroupRingElem, value, g::GroupElem)
    end
 end
 
-eltype(X::GroupRingElem) = eltype(X.coeffs)
+Base.size(X::GroupRingElem) = size(X.coeffs)
+Base.linearindexing{T<:GroupRingElem}(::Type{T}) = Base.LinearFast()
 
 ###############################################################################
 #
