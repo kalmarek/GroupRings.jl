@@ -331,8 +331,11 @@ function mul!{T}(result::AbstractVector{T}, X::AbstractVector{T}, Y::AbstractVec
    end
 end
 
-function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
-   result.coeffs *= 0
+function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem{T}, Y::GroupRingElem{T})
+   # @show result === X
+   if result === X
+      result = deepcopy(result)
+   end
    mul!(result.coeffs, X.coeffs, Y.coeffs, parent(X).pm)
    return result
 end
