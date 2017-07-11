@@ -387,10 +387,12 @@ function divexact{T}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    else
       idx = findfirst(Y)
       c = Y[idx]
+      c == 0 || throw("Can not invert")
       g = parent(Y).basis[idx]
       return X*1//c*parent(Y)(inv(g))
    end
 end
+
 ###############################################################################
 #
 #   *-involution
