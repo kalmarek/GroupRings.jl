@@ -323,7 +323,7 @@ function mul!{T}(result::AbstractVector{T}, X::AbstractVector{T}, Y::AbstractVec
       if y != z
          for (i, index) in enumerate(pm[:,j])
             if X[i] != z
-               index == 0 && throw(ArgumentError("The product don't seem to belong to the span of basis!"))
+               index == 0 && throw(ArgumentError("The product don't seem to be supported on basis!"))
                result[index] += X[i]*y
             end
          end
