@@ -318,6 +318,7 @@ end
 
 function mul!{T}(result::AbstractVector{T}, X::AbstractVector{T}, Y::AbstractVector{T}, pm::Array{Int,2})
    z = zero(T)
+   result .= z
    for (j,y) in enumerate(Y)
       if y != z
          for (i, index) in enumerate(pm[:,j])
