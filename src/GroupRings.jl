@@ -208,9 +208,9 @@ function show(io::IO, X::GroupRingElem)
    elseif isdefined(RG, :basis)
       non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findn(X.coeffs))
       elts = ("$(sign(c)> 0? " + ": " - ")$(abs(c))*$g" for (c,g) in non_zeros)
-      str = join(elts, "")
+      str = join(elts, "")[2:end]
       if sign(first(non_zeros)[1]) > 0
-         str = str[4:end]
+         str = str[3:end]
       end
       print(io, str)
    else
