@@ -301,14 +301,15 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function mul!{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
-   pm::Array{Int,2}, result::AbstractVector{T})
-   for (j,y) in enumerate(Y)
-      if y != zero(eltype(Y))
-         for (i, index) in enumerate(pm[:,j])
-            if X[i] != zero(eltype(X))
-               index == 0 && throw(ArgumentError("The product don't seem to belong to the span of basis!"))
-               result[index] += X[i]*y
+function mul!{T}(result::AbstractVector{T}, X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
+   z = zero(T)
+   result .= z
+   for j in eachindex(Y)
+      if Y[j] != z
+         for i in 1:size(pm,1)
+            if X[i] != z
+               pm[i,j] == 0 && throw(ArgumentError("The product don't seem to be supported on basis!"))
+               result[pm[i,j]] += X[i]*Y[j]
             end
          end
       end
