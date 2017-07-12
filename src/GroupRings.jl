@@ -151,11 +151,13 @@ function (RG::GroupRing)(X::GroupRingElem)
 end
 
 function (RG::GroupRing)(X::GroupRingElem, emb::Function)
-    result = RG(eltype(X.coeffs))
-    for g in parent(X).basis
-        result[emb(g)] = X[g]
-    end
-    return result
+   result = RG(eltype(X.coeffs))
+   T = typeof(X.coeffs)
+   result.coeffs = T(result.coeffs)
+   for g in parent(X).basis
+      result[emb(g)] = X[g]
+   end
+   return result
 end
 
 ###############################################################################
