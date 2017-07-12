@@ -346,7 +346,7 @@ function mul!{T<:Number}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRin
       result = deepcopy(result)
    end
 
-   TT = typeof(first(a.coeffs)*first(b.coeffs))
+   TT = typeof(first(X.coeffs)*first(Y.coeffs))
 
    if TT != T
       warn("Type of the result $T does not contain type of the product ($TT), promoting.")
