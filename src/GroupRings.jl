@@ -315,7 +315,7 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function mul!{T}(result::AbstractVector{T}, X::AbstractVector{T}, Y::AbstractVector{T}, pm::Array{Int,2})
+function mul!{T}(result::AbstractVector{T}, X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
    z = zero(T)
    result .= z
    for (j,y) in enumerate(Y)
@@ -339,15 +339,19 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem{T}, Y::GroupRingElem
    return result
 end
 
-function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
-   S, T, U = eltype(result), eltype(X), eltype(Y)
-   TT = promote_type(S, T, U)
-   if S != TT || T != TT || U != TT
-      warn("Types $S, $T, $U are not the same, promoting the result to $TT")
-      result.coeffs = convert(Array{TT},result.coeffs)
+function mul!{T<:Number}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
+   if result === X
+      result = deepcopy(result)
    end
-   result = deepcopy(result)
-   mul!(result.coeffs, convert(Array{TT}, X.coeffs), convert(Array{TT}, Y.coeffs), parent(X).pm)
+
+   TT = typeof(first(a.coeffs)*first(b.coeffs))
+
+   if TT != T
+      warn("Type of the result $T does not contain type of the product ($TT), promoting.")
+      result = convert(TT, result)
+   end
+
+   mul!(result.coeffs, X.coeffs, Y.coeffs, parent(X).pm)
    return result
 end
 
