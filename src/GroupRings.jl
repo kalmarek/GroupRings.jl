@@ -340,11 +340,14 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem{T}, Y::GroupRingElem
 end
 
 function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
-   S, T, U = eltype(result), eltype(X), eltype(U)
+   S, T, U = eltype(result), eltype(X), eltype(Y)
    TT = promote_type(S, T, U)
-   warn("Types $S, $T, $U are not the same, promoting the result to $TT")
+   if S != TT || T != TT || U != TT
+      warn("Types $S, $T, $U are not the same, promoting the result to $TT")
+      result.coeffs = convert(Array{TT},result.coeffs)
+   end
    result = deepcopy(result)
-   mul!(convert(Array{TT},result.coeffs), convert(Array{TT}, X.coeffs), convert(Array{TT}, Y.coeffs), parent(X).pm)
+   mul!(result.coeffs, convert(Array{TT}, X.coeffs), convert(Array{TT}, Y.coeffs), parent(X).pm)
    return result
 end
 
