@@ -167,7 +167,7 @@ function deepcopy_internal(X::GroupRingElem, dict::ObjectIdDict)
 end
 
 function hash(X::GroupRingElem, h::UInt)
-   return hash(X.coeffs, hash(parent(X), h))
+   return hash(full(X.coeffs), hash(parent(X), hash(GroupRingElem, h)))
 end
 
 function getindex(X::GroupRingElem, n::Int)
