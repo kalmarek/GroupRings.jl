@@ -120,7 +120,11 @@ end
 zero(RG::GroupRing, T::Type=Int) = RG(T)
 one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
 
-(RG::GroupRing)(i::Int, T::Type=Int) = i*one(RG, T)
+function (RG::GroupRing)(i::Int, T::Type=Int)
+   elt = RG(T)
+   elt[RG.group()] = i
+   return elt
+end
 
 function (RG::GroupRing)(T::Type=Int)
    isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
