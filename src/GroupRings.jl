@@ -128,11 +128,7 @@ function (RG::GroupRing)(T::Type=Int)
 end
 
 function (RG::GroupRing)(g::GroupElem, T::Type=Int)
-   g = try
-      RG.group(g)
-   catch
-      throw("Can't coerce $g to the underlying group of $RG")
-   end
+   g = RG.group(g)
    result = RG(T)
    result[g] = one(T)
    return result
@@ -171,7 +167,7 @@ function deepcopy_internal(X::GroupRingElem, dict::ObjectIdDict)
 end
 
 function hash(X::GroupRingElem, h::UInt)
-   return hash(X.coeffs, hash(parent(X), h))
+   return hash(full(X.coeffs), hash(parent(X), hash(GroupRingElem, h)))
 end
 
 function getindex(X::GroupRingElem, n::Int)
