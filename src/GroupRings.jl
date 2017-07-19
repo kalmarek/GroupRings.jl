@@ -300,16 +300,18 @@ function addeq!{T}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    return X
 end
 
-function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
-   parent(X) == parent(Y) || throw(ArgumentError(
-   "Elements don't seem to belong to the same Group Ring!"))
+function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true)
+   if check
+      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
+   end
    return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
 function add{T<:Number, S<:Number}(X::GroupRingElem{T},
-   Y::GroupRingElem{S})
-   parent(X) == parent(Y) || throw(ArgumentError(
-   "Elements don't seem to belong to the same Group Ring!"))
+   Y::GroupRingElem{S}, check::Bool=true)
+   if check
+      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
+   end
    warn("Adding elements with different base rings!")
    return GroupRingElem(+(promote(X.coeffs, Y.coeffs)...), parent(X))
 end
