@@ -130,7 +130,7 @@ function (RG::GroupRing)(i::Int, T::Type=Int)
 end
 
 function (RG::GroupRing)(T::Type=Int)
-   isdefined(RG, :basis) || throw("Complete the definition of GroupRing first")
+   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
    return GroupRingElem(spzeros(T,length(RG.basis)), RG)
 end
 
@@ -142,6 +142,7 @@ function (RG::GroupRing)(g::GroupElem, T::Type=Int)
 end
 
 function (RG::GroupRing)(x::AbstractVector)
+   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    result = RG(eltype(x))
    result.coeffs = x
@@ -154,6 +155,7 @@ function (RG::GroupRing)(X::GroupRingElem)
 end
 
 function (RG::GroupRing)(X::GroupRingElem, emb::Function)
+   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
    result = RG(eltype(X.coeffs))
    T = typeof(X.coeffs)
    result.coeffs = T(result.coeffs)
@@ -415,7 +417,7 @@ end
 
 function star{T}(X::GroupRingElem{T})
    RG = parent(X)
-   isdefined(RG, :basis) || complete(RG)
+   isdefined(RG, :basis) || throw("*-involution without basis is not possible")
    result = RG(T)
    for (i,c) in enumerate(X.coeffs)
       if c != zero(T)
