@@ -43,9 +43,13 @@ type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    end
 end
 
-GroupRing{Gr<:Group}(G::Gr;initialise=true) = GroupRing{Gr, elem_type(G)}(G, initialise=initialise)
+GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, basis::Vector{T}; init=false) =
+   GroupRing{Gr, T}(G, basis, init=init)
 
 GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) = GroupRing{Gr, T}(G, b, b_d, pm)
+
+GroupRing{Gr<:Group}(G::Gr, pm::Array{Int,2}) =
+   GroupRing{Gr, elem_type(G)}(G, pm)
 
 type GroupRingElem{T<:Number} <: RingElem
    coeffs::AbstractVector{T}
