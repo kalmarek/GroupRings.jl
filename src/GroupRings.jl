@@ -385,24 +385,7 @@ function mul(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
    return result
 end
 
-function *{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T})
-   parent(X) == parent(Y) || throw(ArgumentError(
-   "Elements don't seem to belong to the same Group Ring!"))
-   RG = parent(X)
-   isdefined(RG, :pm) || complete(RG)
-   result = mul(X.coeffs, Y.coeffs, RG.pm)
-   return GroupRingElem(result, RG)
-end
 
-function *{T<:Number, S<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{S})
-   parent(X) == parent(Y) || throw("Elements don't seem to belong to the same
-   Group Ring!")
-   warn("Multiplying elements with different base rings!")
-   RG = parent(X)
-   isdefined(RG, :pm) || complete(RG)
-   result = mul(X.coeffs, Y.coeffs, RG.pm)
-   return GroupRingElem(result, RG)
-end
 
 function divexact{T}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    if length(Y) != 1
