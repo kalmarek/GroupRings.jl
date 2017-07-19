@@ -34,9 +34,9 @@ GroupRing{Gr<:Group}(G::Gr;initialise=true) = GroupRing{Gr, elem_type(G)}(G, ini
 
 GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) = GroupRing{Gr, T}(G, b, b_d, pm)
 
-type GroupRingElem{T<:Number, Gr<:Group, GrEl<:GroupElem} <: RingElem
+type GroupRingElem{T<:Number} <: RingElem
    coeffs::AbstractVector{T}
-   parent::GroupRing{Gr, GrEl}
+   parent::GroupRing
 
    function GroupRingElem(c::AbstractVector{T}, RG::GroupRing, check=true)
       if check
@@ -81,8 +81,8 @@ end
 #
 ###############################################################################
 
-function GroupRingElem{T<:Number, Gr<:Group, GrEl<:GroupElem}(c::AbstractVector{T}, RG::GroupRing{Gr, GrEl})
-   return GroupRingElem{T, Gr, GrEl}(c, RG)
+function GroupRingElem{T<:Number}(c::AbstractVector{T}, RG::GroupRing)
+   return GroupRingElem{T}(c, RG)
 end
 
 function GroupRing(G::Group, pm::Array{Int,2})
