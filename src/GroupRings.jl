@@ -487,15 +487,11 @@ function complete!(RG::GroupRing)
    if !isdefined(RG, :basis_dict)
       RG.basis_dict = reverse_dict(RG.basis)
    end
-   if !isdefined(A, :pm)
-      A.pm = try
-         create_pm(A.basis, A.basis_dict)
-      catch err
-         isa(err, KeyError) && throw("Product is not supported on basis")
-         throw(err)
-      end
+   for linidx in find(RG.pm .== 0)
+      i,j = ind2sub(size(RG.pm), linidx)
+      RG.pm[i,j] = RG.basis_dict[RG.basis[i]*RG.basis[j]]
    end
-   return A
+   return RG
 end
 
 end # of module GroupRings
