@@ -335,12 +335,23 @@ function mul!{T}(result::AbstractVector{T},
    end
 end
 
-function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem{T}, Y::GroupRingElem{T})
-   # @show result === X
+function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
    if result === X
       result = deepcopy(result)
    end
-   mul!(result.coeffs, X.coeffs, Y.coeffs, parent(X).pm)
+
+   z = zero(T)
+   result.coeffs .= z
+
+   for j in eachindex(Y.coeffs)
+      if Y.coeffs[j] != z
+         for i in eachindex(X.coeffs)
+            if X.coeffs[i] != z
+               result.coeffs[parent(X).pm[i,j]] += X[i]*Y[j]
+            end
+         end
+      end
+   end
    return result
 end
 
