@@ -371,10 +371,15 @@ function mul!{T<:Number}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRin
    return result
 end
 
-function mul{T<:Number}(X::AbstractVector{T}, Y::AbstractVector{T},
-   pm::Array{Int,2})
-   result = zeros(X)
-   mul!(result, X, Y, pm)
+function *{T<:Number, S<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true)
+   if true
+      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
+   end
+
+   TT = typeof(first(X.coeffs)*first(Y.coeffs))
+   warn("Multiplying elements with different base rings! Promoting the result to $TT.")
+
+   result = mul!(result, X, Y)
    return result
 end
 
