@@ -17,16 +17,29 @@ type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    basis_dict::Dict{T, Int}
    pm::Array{Int,2}
 
-   function GroupRing(G::Gr; initialise=true)
-      A = new(G)
-      if initialise
-         complete(A)
+   function GroupRing(G::Group, basis::Vector{T}; init::Bool=false)
+      RG = new(G, basis, reverse_dict(basis))
+      if init
+         RG.pm = try
+            create_pm(RG.basis, RG.basis_dict)
+         catch err
+            isa(err, KeyError) && throw("Product is not supported on basis")
+            throw(err)
+         end
+      else
+         RG.pm = zeros(Int, length(basis), length(basis))
       end
-      return A
+      return RG
    end
 
    function GroupRing(G::Gr, basis::Vector{T}, basis_dict::Dict{T,Int}, pm::Array{Int,2})
       return new(G, basis, basis_dict, pm)
+   end
+
+   function GroupRing(G::Gr, pm::Array{Int,2})
+      RG = new(G)
+      RG.pm = pm
+      return RG
    end
 end
 
