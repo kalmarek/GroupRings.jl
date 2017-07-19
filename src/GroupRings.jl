@@ -317,7 +317,10 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
-function mul!{T}(result::AbstractVector{T}, X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
+function mul!{T}(result::AbstractVector{T},
+                      X::AbstractVector,
+                      Y::AbstractVector,
+                     pm::Array{Int,2})
    z = zero(T)
    result .= z
    for j in eachindex(Y)
