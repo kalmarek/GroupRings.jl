@@ -321,6 +321,20 @@ end
 (+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
 (-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
 
+doc"""
+    mul!{T}(result::AbstractArray{T},
+                 X::AbstractVector,
+                 Y::AbstractVector,
+                pm::Array{Int,2})
+> The most specialised multiplication for `X` and `Y` (`coeffs` of
+> `GroupRingElems`) using multiplication table `pm`.
+> Notes:
+> * this method will silently produce false results if `X[k]` is non-zero for
+> `k > size(pm,1)`.
+> * This method will fail if any zeros (i.e. uninitialised entries) are present
+> in `pm`.
+> * Use with extreme care!
+"""
 function mul!{T}(result::AbstractVector{T},
                       X::AbstractVector,
                       Y::AbstractVector,
@@ -339,6 +353,17 @@ function mul!{T}(result::AbstractVector{T},
    end
 end
 
+doc"""
+    mul!{T}(result::GroupRingElem{T},
+                 X::GroupRingElem,
+                 Y::GroupRingElem)
+> In-place multiplication for `GroupRingElem`s `X` and `Y`.
+> `mul!` will make use the initialised entries of `pm` attribute of
+> `parent(X)::GroupRing` (if available), and will compute and store in `pm` the
+> remaining products.
+> The method will fail with `KeyError` if product `X*Y` is not supported on
+> `parent(X).basis`.
+"""
 function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
    if result === X
       result = deepcopy(result)
