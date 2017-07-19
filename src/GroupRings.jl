@@ -294,8 +294,6 @@ end
 ###############################################################################
 
 function addeq!{T}(X::GroupRingElem{T}, Y::GroupRingElem{T})
-   parent(X) == parent(Y) || throw(ArgumentError(
-   "Elements don't seem to belong to the same Group Ring!"))
    X.coeffs .+= Y.coeffs
    return X
 end
