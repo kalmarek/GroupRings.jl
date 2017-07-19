@@ -363,19 +363,18 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
    return result
 end
 
-function mul!{T<:Number}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
-   if result === X
-      result = deepcopy(result)
+function *{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true)
+   if check
+      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
-
-   TT = typeof(first(X.coeffs)*first(Y.coeffs))
-
-   if TT != T
-      warn("Type of the result $T does not contain type of the product ($TT), promoting.")
-      result = convert(TT, result)
+   if isdefined(parent(X), :basis)
+      result = parent(X)(similar(X.coeffs))
+      result = mul!(result, X, Y)
+   else
+      result = similar(X.coeffs)
+      result = mul!(result, X.coeffs, Y.coeffs, parent(X).pm)
+      result = GroupRingElem(result, parent(X))
    end
-
-   mul!(result.coeffs, X.coeffs, Y.coeffs, parent(X).pm)
    return result
 end
 
@@ -389,12 +388,17 @@ function *{T<:Number, S<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{S}, check
 
    result = mul!(result, X, Y)
    return result
-end
 
-function mul(X::AbstractVector, Y::AbstractVector, pm::Array{Int,2})
-   T = promote_type(eltype(X), eltype(Y))
-   result = zeros(T, X)
-   mul!(result, Vector{T}(X), Vector{T}(Y), pm)
+   if isdefined(parent(X), :basis)
+      result = parent(X)(similar(X.coeffs))
+      result = convert(TT, result)
+      result = mul!(result, X, Y)
+   else
+      result = similar(X.coeffs)
+      result = convert(TT, result)
+      result = mul!(result, X.coeffs, Y.coeffs, parent(X).pm)
+      result = GroupRingElem(result, parent(X))
+   end
    return result
 end
 
