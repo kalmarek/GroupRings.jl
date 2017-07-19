@@ -253,8 +253,8 @@ function (==)(A::GroupRing, B::GroupRing)
       A.basis == B.basis || return false
    else
       warn("Bases of GroupRings are not defined, comparing products mats.")
+      A.pm == B.pm || return false
    end
-   A.pm == B.pm || return false
    return true
 end
 
