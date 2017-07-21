@@ -373,15 +373,17 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
    z = zero(T)
    result.coeffs .= z
 
-   for j in eachindex(Y.coeffs)
+   RG = parent(X)
+
+   for j::Int in eachindex(Y.coeffs)
       if Y.coeffs[j] != z
-         for i in eachindex(X.coeffs)
+         for i::Int in eachindex(X.coeffs)
             if X.coeffs[i] != z
-               if parent(X).pm[i,j] == 0
-                  g = parent(X).basis[i]*parent(Y).basis[j]
-                  parent(X).pm[i,j] = parent(X).basis_dict[g]
+               if RG.pm[i,j] == 0
+                  g::elem_type(parent(X).group) = RG.basis[i]*RG.basis[j]
+                  RG.pm[i,j] = RG.basis_dict[g]
                end
-               result.coeffs[parent(X).pm[i,j]] += X[i]*Y[j]
+               result.coeffs[RG.pm[i,j]] += X[i]*Y[j]
             end
          end
       end
