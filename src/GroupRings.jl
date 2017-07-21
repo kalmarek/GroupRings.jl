@@ -399,8 +399,7 @@ function *{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true
       result = parent(X)(similar(X.coeffs))
       result = mul!(result, X, Y)
    else
-      result = similar(X.coeffs)
-      result = mul!(result, X.coeffs, Y.coeffs, parent(X).pm)
+      result = mul!(similar(X.coeffs), X.coeffs, Y.coeffs, parent(X).pm)
       result = GroupRingElem(result, parent(X))
    end
    return result
@@ -422,8 +421,7 @@ function *{T<:Number, S<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{S}, check
       result = convert(TT, result)
       result = mul!(result, X, Y)
    else
-      result = similar(X.coeffs)
-      result = convert(TT, result)
+      result = convert(TT, similar(X.coeffs))
       result = mul!(result, X.coeffs, Y.coeffs, parent(X).pm)
       result = GroupRingElem(result, parent(X))
    end
