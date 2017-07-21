@@ -351,6 +351,7 @@ function mul!{T}(result::AbstractVector{T},
          end
       end
    end
+   return result
 end
 
 doc"""
