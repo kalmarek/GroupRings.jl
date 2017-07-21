@@ -10,14 +10,16 @@ using Nemo
       @test isa(GroupRing(G), Nemo.Ring)
       @test isa(GroupRing(G), GroupRing)
 
-      RG = GroupRing(G, initialise=false)
-      @test isdefined(RG, :pm) == false
-      @test isdefined(RG, :basis) == false
-      @test isdefined(RG, :basis_dict) == false
-
-      @test isa(complete(RG), GroupRing)
-      @test size(RG.pm) == (6,6)
+      RG = GroupRing(G, init=false)
+      @test isdefined(RG, :basis) == true
       @test length(RG.basis) == 6
+      @test isdefined(RG, :basis_dict) == true
+      @test isdefined(RG, :pm) == true
+      @test RG.pm == zeros(Int, (6,6))
+
+      @test isa(complete!(RG), GroupRing)
+      @test all(RG.pm .> 0)
+      @test RG.pm == GroupRing(G, init=true).pm
 
       @test RG.basis_dict == GroupRings.reverse_dict(elements(G))
 
@@ -63,7 +65,7 @@ using Nemo
 
    @testset "GroupRingElems constructors/basic manipulation" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G, initialise=true)
+      RG = GroupRing(G, init=true)
       a = rand(6)
       @test isa(GroupRingElem(a, RG), GroupRingElem)
       @test isa(RG(a), GroupRingElem)
@@ -119,6 +121,9 @@ using Nemo
          @test isa(2.0*a, GroupRingElem)
          @test eltype(2.0*a) == typeof(2.0)
          @test (2.0*a).coeffs == 2.0.*(a.coeffs)
+
+         b = RG(1) + GroupRings.star(a)
+         @test a*b == mul!(a,a,b)
 
          @test isa(a/2, GroupRingElem)
          @test eltype(a/2) == typeof(1/2)
