@@ -103,7 +103,7 @@ function GroupRingElem{T<:Number}(c::AbstractVector{T}, RG::GroupRing)
 end
 
 function GroupRing(G::Group; init::Bool=false)
-   return GroupRing(G, collect(elements(G)), init=init)
+   return GroupRing(G, [elements(G)...], init=init)
 end
 
 function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
