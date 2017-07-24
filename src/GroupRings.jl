@@ -417,9 +417,6 @@ function *{T<:Number, S<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{S}, check
    TT = typeof(first(X.coeffs)*first(Y.coeffs))
    warn("Multiplying elements with different base rings! Promoting the result to $TT.")
 
-   result = mul!(result, X, Y)
-   return result
-
    if isdefined(parent(X), :basis)
       result = parent(X)(similar(X.coeffs))
       result = convert(TT, result)
@@ -436,11 +433,11 @@ end
 
 function divexact{T}(X::GroupRingElem{T}, Y::GroupRingElem{T})
    if length(Y) != 1
-      throw("Can not divide by a non-primitive element $(Y)!")
+      throw("Can not divide by a non-primitive element: $(Y)!")
    else
       idx = findfirst(Y)
       c = Y[idx]
-      c == 0 || throw("Can not invert")
+      c != 0 || throw("Can not invert: $c not found in $Y")
       g = parent(Y).basis[idx]
       return X*1//c*parent(Y)(inv(g))
    end
