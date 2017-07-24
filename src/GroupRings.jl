@@ -375,10 +375,14 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
 
    RG = parent(X)
 
+   s = size(RG.pm)
+
    for j::Int in eachindex(Y.coeffs)
       if Y.coeffs[j] != z
+         j <= s[2] || throw("Element in Y outside of support of RG.pm")
          for i::Int in eachindex(X.coeffs)
             if X.coeffs[i] != z
+               i <= s[1] || throw("Element in X outside of support of RG.pm")
                if RG.pm[i,j] == 0
                   g::elem_type(parent(X).group) = RG.basis[i]*RG.basis[j]
                   RG.pm[i,j] = RG.basis_dict[g]
