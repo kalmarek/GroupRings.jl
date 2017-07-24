@@ -413,9 +413,6 @@ function *{T<:Number, S<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{S}, check
    TT = typeof(first(X.coeffs)*first(Y.coeffs))
    warn("Multiplying elements with different base rings! Promoting the result to $TT.")
 
-   result = mul!(result, X, Y)
-   return result
-
    if isdefined(parent(X), :basis)
       result = parent(X)(similar(X.coeffs))
       result = convert(TT, result)
