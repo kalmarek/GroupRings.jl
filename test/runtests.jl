@@ -125,9 +125,6 @@ using Nemo
          @test eltype(2.0*a) == typeof(2.0)
          @test (2.0*a).coeffs == 2.0.*(a.coeffs)
 
-         b = RG(1) + GroupRings.star(a)
-         @test a*b == mul!(a,a,b)
-
          @test isa(a/2, GroupRingElem)
          @test eltype(a/2) == typeof(1/2)
          @test (a/2).coeffs == 0.5*(a.coeffs)
@@ -172,6 +169,9 @@ using Nemo
                2*one(RG) - RG(g) - RG(inv(g))
             @test GroupRings.augmentation((one(RG)-RG(g))) == 0
          end
+
+         b = RG(1) + GroupRings.star(a)
+         @test a*b == mul!(a,a,b)
 
          z = sum((one(RG)-RG(g))*GroupRings.star(one(RG)-RG(g)) for g in elements(G))
 
