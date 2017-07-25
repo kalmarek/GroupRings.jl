@@ -10,16 +10,19 @@ using Nemo
       @test isa(GroupRing(G), Nemo.Ring)
       @test isa(GroupRing(G), GroupRing)
 
-      RG = GroupRing(G, init=false)
+      RG = GroupRing(G)
       @test isdefined(RG, :basis) == true
       @test length(RG.basis) == 6
       @test isdefined(RG, :basis_dict) == true
+      @test isdefined(RG, :pm) == false
+
+      RG = GroupRing(G, fastm=true)
       @test isdefined(RG, :pm) == true
       @test RG.pm == zeros(Int, (6,6))
 
       @test isa(complete!(RG), GroupRing)
       @test all(RG.pm .> 0)
-      @test RG.pm == GroupRing(G, init=true).pm
+      @test RG.pm == GroupRings.fastm!(GroupRing(G, fastm=false), fill=true).pm
 
       @test RG.basis_dict == GroupRings.reverse_dict(elements(G))
 
@@ -65,7 +68,7 @@ using Nemo
 
    @testset "GroupRingElems constructors/basic manipulation" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G, init=true)
+      RG = GroupRing(G, fastm=true)
       a = rand(6)
       @test isa(GroupRingElem(a, RG), GroupRingElem)
       @test isa(RG(a), GroupRingElem)
@@ -106,7 +109,7 @@ using Nemo
 
    @testset "Arithmetic" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G)
+      RG = GroupRing(G, fastm=true)
       a = RG(ones(Int, order(G)))
 
       @testset "scalar operators" begin
