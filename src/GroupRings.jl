@@ -330,7 +330,7 @@ function mul!{T}(result::AbstractVector{T},
                      pm::Array{Int,2})
    z = zero(T)
    result .= z
-   for j in eachindex(Y)
+   for j in 1:length(Y)
       if Y[j] != z
          for i in 1:size(pm,1)
             if X[i] != z
