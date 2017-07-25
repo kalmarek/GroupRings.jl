@@ -74,7 +74,7 @@ parent_type(::Type{GroupRingElem}) = GroupRing
 
 eltype(X::GroupRingElem) = eltype(X.coeffs)
 
-parent{T}(g::GroupRingElem{T}) = g.parent
+parent(g::GroupRingElem) = g.parent
 
 Base.promote_rule{T<:Number,S<:Number}(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) = GroupRingElem{promote_type(T,S)}
 
