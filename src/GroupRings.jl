@@ -17,18 +17,9 @@ type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    basis_dict::Dict{T, Int}
    pm::Array{Int,2}
 
-   function GroupRing(G::Group, basis::Vector{T}; init::Bool=false)
+   function GroupRing(G::Group, basis::Vector{T}; fastm::Bool=false)
       RG = new(G, basis, reverse_dict(basis))
-      if init
-         RG.pm = try
-            create_pm(RG.basis, RG.basis_dict)
-         catch err
-            isa(err, KeyError) && throw("Product is not supported on basis")
-            throw(err)
-         end
-      else
-         RG.pm = zeros(Int, length(basis), length(basis))
-      end
+      fastm && fastm!(RG)
       return RG
    end
 
@@ -43,8 +34,8 @@ type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    end
 end
 
-GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, basis::Vector{T}; init=false) =
-   GroupRing{Gr, T}(G, basis, init=init)
+GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, basis::Vector{T}; fastm::Bool=true) =
+   GroupRing{Gr, T}(G, basis, fastm=fastm)
 
 GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) = GroupRing{Gr, T}(G, b, b_d, pm)
 
@@ -101,8 +92,8 @@ function GroupRingElem{T<:Number}(c::AbstractVector{T}, RG::GroupRing)
    return GroupRingElem{T}(c, RG)
 end
 
-function GroupRing(G::Group; init::Bool=false)
-   return GroupRing(G, [elements(G)...], init=init)
+function GroupRing(G::Group; fastm::Bool=false)
+   return GroupRing(G, [elements(G)...], fastm=fastm)
 end
 
 function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
@@ -516,6 +507,22 @@ function complete!(RG::GroupRing)
    for linidx in find(RG.pm .== 0)
       i,j = ind2sub(size(RG.pm), linidx)
       RG.pm[i,j] = RG.basis_dict[RG.basis[i]*RG.basis[j]]
+   end
+   return RG
+end
+
+function fastm!(RG::GroupRing; fill::Bool=false)
+   isdefined(RG, :basis) || throw("For baseless Group Rings You need to provide pm.")
+   isdefined(RG, :pm) && return RG
+   if fill
+      RG.pm = try
+         create_pm(RG.basis, RG.basis_dict)
+      catch err
+         isa(err, KeyError) && throw("Product is not supported on basis, $err.")
+         throw(err)
+      end
+   else
+      RG.pm = zeros(Int, length(RG.basis), length(RG.basis))
    end
    return RG
 end
