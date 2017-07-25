@@ -99,8 +99,7 @@ end
 function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
    size(pm,1) == size(pm,2) || throw("pm must be square, got $(size(pm))")
    eltype(basis) == elem_type(G) || throw("Basis must consist of elements of $G")
-   basis_dict = reverse_dict(basis)
-   return GroupRing(G, basis, basis_dict, pm)
+   return GroupRing(G, basis, reverse_dict(basis), pm)
 end
 
 ###############################################################################
