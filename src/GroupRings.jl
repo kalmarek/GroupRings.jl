@@ -77,9 +77,8 @@ export GroupRing, GroupRingElem, complete!, create_pm, star
 #
 ###############################################################################
 
-elem_type(::GroupRing) = GroupRingElem
+elem_type(::Type{GroupRing}) = GroupRingElem
 
-parent_type(::GroupRingElem) = GroupRing
 parent_type(::Type{GroupRingElem}) = GroupRing
 
 eltype(X::GroupRingElem) = eltype(X.coeffs)
