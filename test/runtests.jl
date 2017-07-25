@@ -73,9 +73,7 @@ using Nemo
       @test isa(GroupRingElem(a, RG), GroupRingElem)
       @test isa(RG(a), GroupRingElem)
 
-      for g in elements(G)
-         @test isa(RG(g), GroupRingElem)
-      end
+      @test all(isa(RG(g), GroupRingElem) for g in elements(G))
 
       @test_throws String GroupRingElem([1,2,3], RG)
       @test isa(RG(G([2,3,1])), GroupRingElem)
