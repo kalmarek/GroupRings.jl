@@ -490,7 +490,7 @@ function reverse_dict(iter)
 end
 
 function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
-   limit=length(basis); twisted=false)
+   limit::Int=length(basis); twisted::Bool=false)
    product_matrix = zeros(Int, (limit,limit))
    for i in 1:limit
       x = basis[i]
