@@ -365,19 +365,30 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
 
    RG = parent(X)
 
-   s = size(RG.pm)
+   if isdefined(RG, :pm)
+      s = size(RG.pm)
 
-   for j::Int in eachindex(Y.coeffs)
-      if Y.coeffs[j] != z
-         j <= s[2] || throw("Element in Y outside of support of RG.pm")
-         for i::Int in eachindex(X.coeffs)
-            if X.coeffs[i] != z
-               i <= s[1] || throw("Element in X outside of support of RG.pm")
-               if RG.pm[i,j] == 0
-                  g::elem_type(parent(X).group) = RG.basis[i]*RG.basis[j]
-                  RG.pm[i,j] = RG.basis_dict[g]
+      for j::Int in 1:length(Y.coeffs)
+         if Y.coeffs[j] != z
+            j <= s[2] || throw("Element in Y outside of support of RG.pm")
+            for i::Int in 1:length(X.coeffs)
+               if X.coeffs[i] != z
+                  i <= s[1] || throw("Element in X outside of support of RG.pm")
+                  if RG.pm[i,j] == 0
+                     RG.pm[i,j] = RG.basis_dict[RG.basis[i]*RG.basis[j]]
+                  end
+                  result.coeffs[RG.pm[i,j]] += X[i]*Y[j]
                end
-               result.coeffs[RG.pm[i,j]] += X[i]*Y[j]
+            end
+         end
+      end
+   else
+      for j::Int in 1:length(Y.coeffs)
+         if Y.coeffs[j] != z
+            for i::Int in 1:length(X.coeffs)
+               if X.coeffs[i] != z
+                  result[RG.basis[i]*RG.basis[j]] += X[i]*Y[j]
+               end
             end
          end
       end
