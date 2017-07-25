@@ -501,9 +501,9 @@ function complete!(RG::GroupRing)
    if !isdefined(RG, :basis)
       RG.basis = [elements(RG.group)...]
    end
-   if !isdefined(RG, :basis_dict)
-      RG.basis_dict = reverse_dict(RG.basis)
-   end
+
+   fastm!(RG, fill=true)
+
    for linidx in find(RG.pm .== 0)
       i,j = ind2sub(size(RG.pm), linidx)
       RG.pm[i,j] = RG.basis_dict[RG.basis[i]*RG.basis[j]]
