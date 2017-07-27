@@ -136,12 +136,22 @@ function (RG::GroupRing)(g::GroupElem, T::Type=Int)
    return result
 end
 
-function (RG::GroupRing)(x::AbstractVector)
+function (RG::GroupRing){T<:Number}(x::AbstractVector{T})
    isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    result = RG(eltype(x))
    result.coeffs = x
    return result
+end
+
+function (RG::GroupRing{Gr,T}){Gr<:Nemo.Group, T<:Nemo.GroupElem}(V::Vector{T},
+   S::Type=Rational{Int}; alt=false)
+    res = RG(S)
+    for g in V
+        c = (alt ? sign(g)*one(S) : one(S))
+        res[g] += c/length(V)
+    end
+    return res
 end
 
 function (RG::GroupRing)(X::GroupRingElem)
