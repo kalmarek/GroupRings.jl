@@ -110,10 +110,17 @@ end
 
 zero(RG::GroupRing, T::Type=Int) = RG(T)
 one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
+one{R<:Nemo.Ring, S<:Nemo.RingElem}(RG::GroupRing{R,S}) = RG(eye(RG.group()))
 
 function (RG::GroupRing)(i::Int, T::Type=Int)
    elt = RG(T)
    elt[RG.group()] = i
+   return elt
+end
+
+function (RG::GroupRing{R,S}){R<:Ring, S}(i::Int, T::Type=Int)
+   elt = RG(T)
+   elt[eye(RG.group())] = i
    return elt
 end
 
