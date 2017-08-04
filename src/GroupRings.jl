@@ -271,6 +271,11 @@ end
 
 (-)(X::GroupRingElem) = GroupRingElem(-X.coeffs, parent(X))
 
+function mul!{T<:Number}(a::T, X::GroupRingElem{T})
+   X.coeffs .*= a
+   return X
+end
+
 mul{T<:Number}(a::T, X::GroupRingElem{T}) = GroupRingElem(a*X.coeffs, parent(X))
 
 function mul{T<:Number, S<:Number}(a::T, X::GroupRingElem{S})
