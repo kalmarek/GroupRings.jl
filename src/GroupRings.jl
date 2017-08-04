@@ -509,7 +509,7 @@ end
 function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
    limit::Int=length(basis); twisted::Bool=false)
    product_matrix = zeros(Int, (limit,limit))
-   for i in 1:limit
+   Threads.@threads for i in 1:limit
       x = basis[i]
       if twisted
          x = inv(x)
