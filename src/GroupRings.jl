@@ -520,8 +520,7 @@ function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
          x = inv(x)
       end
       for j in 1:limit
-         w = x*(basis[j])
-         product_matrix[i,j] = basis_dict[w]
+         product_matrix[i,j] = basis_dict[x*(basis[j])]
       end
    end
    return product_matrix
