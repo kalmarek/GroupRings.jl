@@ -352,9 +352,12 @@ function mul!{T}(result::AbstractVector{T},
                      pm::Array{Int,2})
    z = zero(T)
    result .= z
-   for j in 1:length(Y)
+   lY = length(Y)
+   s = size(pm,1)
+
+   @inbounds for j in 1:lY
       if Y[j] != z
-         for i in 1:size(pm,1)
+         for i in 1:s
             if X[i] != z
                pm[i,j] == 0 && throw(ArgumentError("The product don't seem to be supported on basis!"))
                result[pm[i,j]] += X[i]*Y[j]
@@ -386,15 +389,18 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
 
    RG = parent(X)
 
+   lX = length(X.coeffs)
+   lY = length(Y.coeffs)
+
    if isdefined(RG, :pm)
       s = size(RG.pm)
+      findlast(X.coeffs) <= s[1] || throw("Element in X outside of support of RG.pm")
+      findlast(Y.coeffs) <= s[2] || throw("Element in Y outside of support of RG.pm")
 
-      for j::Int in 1:length(Y.coeffs)
+      for j in 1:lY
          if Y.coeffs[j] != z
-            j <= s[2] || throw("Element in Y outside of support of RG.pm")
-            for i::Int in 1:length(X.coeffs)
+            for i in 1:lX
                if X.coeffs[i] != z
-                  i <= s[1] || throw("Element in X outside of support of RG.pm")
                   if RG.pm[i,j] == 0
                      RG.pm[i,j] = RG.basis_dict[RG.basis[i]*RG.basis[j]]
                   end
@@ -404,9 +410,9 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
          end
       end
    else
-      for j::Int in 1:length(Y.coeffs)
+      for j::Int in 1:lY
          if Y.coeffs[j] != z
-            for i::Int in 1:length(X.coeffs)
+            for i::Int in 1:lX
                if X.coeffs[i] != z
                   result[RG.basis[i]*RG.basis[j]] += X[i]*Y[j]
                end
