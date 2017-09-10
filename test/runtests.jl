@@ -58,13 +58,13 @@ using Nemo
       @test A == B
 
       RF = GroupRing(F, basis, d, create_pm(basis, d, check=false))
-      nz1 = contnz(RF.pm)
+      nz1 = countnz(RF.pm)
       @test nz1 > 1000
 
       GroupRings.complete!(RF)
-      nz2 = contnz(RF.pm)
+      nz2 = countnz(RF.pm)
       @test nz2 > nz1
-      @test nz2 = 45469
+      @test nz2 == 45469
 
       g = B()
       s = S[2]
