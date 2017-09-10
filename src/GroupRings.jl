@@ -556,12 +556,21 @@ function complete!(RG::GroupRing)
       RG.basis = [elements(RG.group)...]
    end
 
-   fastm!(RG, fill=true)
+   fastm!(RG, fill=false)
 
+   warning = false
    for linidx in find(RG.pm .== 0)
       i,j = ind2sub(size(RG.pm), linidx)
-      RG.pm[i,j] = RG.basis_dict[RG.basis[i]*RG.basis[j]]
+      g = RG.basis[i]*RG.basis[j]
+      if haskey(RG.basis_dict, g)
+          RG.pm[i,j] = RG.basis_dict[g]
+      else
+         if !warning
+            warning = true
+         end
+      end
    end
+   warning && warn("Some products were not supported on basis")
    return RG
 end
 
