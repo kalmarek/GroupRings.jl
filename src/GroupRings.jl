@@ -11,6 +11,8 @@ import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize,
 #
 ###############################################################################
 
+baseless_warn = false
+
 type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    group::Gr
    basis::Vector{T}
@@ -232,7 +234,7 @@ function show(io::IO, X::GroupRingElem)
       end
       print(io, str)
    else
-      warn("Basis of the parent Group is not defined, showing coeffs")
+      baseless_warn && warn("Basis of the parent Group is not defined, showing coeffs")
       show(io, MIME("text/plain"), X.coeffs)
    end
 end
@@ -257,7 +259,7 @@ function (==)(A::GroupRing, B::GroupRing)
    if isdefined(A, :basis) && isdefined(B, :basis)
       A.basis == B.basis || return false
    else
-      warn("Bases of GroupRings are not defined, comparing products mats.")
+      baseless_warn && warn("Bases of GroupRings are not defined, comparing products mats.")
       A.pm == B.pm || return false
    end
    return true
