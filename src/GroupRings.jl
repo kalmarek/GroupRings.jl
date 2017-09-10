@@ -518,7 +518,7 @@ function reverse_dict(iter)
 end
 
 function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
-   limit::Int=length(basis); twisted::Bool=false)
+   limit::Int=length(basis); twisted::Bool=false, check=true)
    product_matrix = zeros(Int, (limit,limit))
    Threads.@threads for i in 1:limit
       x = basis[i]
@@ -526,10 +526,27 @@ function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
          x = inv(x)
       end
       for j in 1:limit
-         product_matrix[i,j] = basis_dict[x*(basis[j])]
+         product_matrix[i,j] = basis_dict[x*basis[j]]
       end
    end
+
+   check && check_pm(product_matrix, basis, twisted)
+
    return product_matrix
+end
+
+function check_pm(product_matrix, basis, twisted)
+   idx = findfirst(product_matrix' .== 0)
+   if idx != 0
+      warn("Product is not supported on basis")
+      i,j = ind2sub(product_matrix, idx)
+      x = basis[i]
+      if twisted
+         x = inv(x)
+      end
+      throw(KeyError(x*basis[j]))
+   end
+   return true
 end
 
 create_pm{T<:GroupElem}(b::Vector{T}) = create_pm(b, reverse_dict(b))
