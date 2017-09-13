@@ -17,18 +17,18 @@ type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    basis_dict::Dict{T, Int}
    pm::Array{Int,2}
 
-   function GroupRing(G::Group, basis::Vector{T}; fastm::Bool=false)
+   function GroupRing{Gr, T}(G::Gr, basis::Vector{T}; fastm::Bool=false) where {Gr, T}
       RG = new(G, basis, reverse_dict(basis))
       fastm && fastm!(RG)
       return RG
    end
 
-   function GroupRing{Gr, T}(G::Gr, b::Vector{T}, b_d::Dict{T, Int}, pm::Array{Int,2}) where {Gr <: Group, T<:GroupElem}
+   function GroupRing{Gr, T}(G::Gr, b::Vector{T}, b_d::Dict{T, Int}, pm::Array{Int,2}) where {Gr,T}
       return new(G, b, b_d, pm)
    end
 
-   function GroupRing(G::Gr, pm::Array{Int,2})
-      RG = new(G)
+   function GroupRing{Gr}(G::Gr, pm::Array{Int,2}) where {Gr}
+      RG = new{Gr, elem_type(G)}(G)
       RG.pm = pm
       return RG
    end
@@ -206,7 +206,7 @@ function setindex!(X::GroupRingElem, value, g::GroupElem)
 end
 
 Base.size(X::GroupRingElem) = size(X.coeffs)
-Base.linearindexing{T<:GroupRingElem}(::Type{T}) = Base.LinearFast()
+Base.IndexStyle{T<:GroupRingElem}(::Type{T}) = Base.LinearFast()
 
 ###############################################################################
 #
