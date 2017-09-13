@@ -10,14 +10,19 @@ using Nemo
       @test isa(GroupRing(G), Nemo.Ring)
       @test isa(GroupRing(G), GroupRing)
 
-      RG = GroupRing(G, initialise=false)
-      @test isdefined(RG, :pm) == false
-      @test isdefined(RG, :basis) == false
-      @test isdefined(RG, :basis_dict) == false
-
-      @test isa(complete(RG), GroupRing)
-      @test size(RG.pm) == (6,6)
+      RG = GroupRing(G)
+      @test isdefined(RG, :basis) == true
       @test length(RG.basis) == 6
+      @test isdefined(RG, :basis_dict) == true
+      @test isdefined(RG, :pm) == false
+
+      RG = GroupRing(G, fastm=true)
+      @test isdefined(RG, :pm) == true
+      @test RG.pm == zeros(Int, (6,6))
+
+      @test isa(complete!(RG), GroupRing)
+      @test all(RG.pm .> 0)
+      @test RG.pm == GroupRings.fastm!(GroupRing(G, fastm=false), fill=true).pm
 
       @test RG.basis_dict == GroupRings.reverse_dict(elements(G))
 
@@ -37,7 +42,7 @@ using Nemo
    @testset "GroupRing constructors FreeGroup" begin
       using Groups
       F = FreeGroup(3)
-      S = generators(F)
+      S = gens(F)
       append!(S, [inv(s) for s in S])
       S = unique(S)
 
@@ -53,18 +58,22 @@ using Nemo
       B = GroupRing(F, basis, d, pm)
       @test A == B
 
+      g = B()
+      s = S[2]
+      g[s] = 1
+      @test g == B(s)
+      @test g[s^2] == 0
+      @test_throws KeyError g[s^10]
    end
 
    @testset "GroupRingElems constructors/basic manipulation" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G, initialise=true)
+      RG = GroupRing(G, fastm=true)
       a = rand(6)
       @test isa(GroupRingElem(a, RG), GroupRingElem)
       @test isa(RG(a), GroupRingElem)
 
-      for g in elements(G)
-         @test isa(RG(g), GroupRingElem)
-      end
+      @test all(isa(RG(g), GroupRingElem) for g in elements(G))
 
       @test_throws String GroupRingElem([1,2,3], RG)
       @test isa(RG(G([2,3,1])), GroupRingElem)
@@ -77,7 +86,8 @@ using Nemo
       @test a[5] == 1
       @test a[p] == 1
 
-      @test string(a) == " + 1*[2, 3, 1]"
+      @test string(a) == "1*[2, 3, 1]"
+      @test string(-a) == "- 1*[2, 3, 1]"
 
       @test RG([0,0,0,0,1,0]) == a
 
@@ -89,14 +99,15 @@ using Nemo
       @test a[1] == 2
       @test a[s] == 2
 
-      @test string(a) == " + 2*[1, 2, 3] + 1*[2, 3, 1]"
+      @test string(a) == "2*[1, 2, 3] + 1*[2, 3, 1]"
+      @test string(-a) == "- 2*[1, 2, 3] - 1*[2, 3, 1]"
 
       @test length(a) == 2
    end
 
    @testset "Arithmetic" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G)
+      RG = GroupRing(G, fastm=true)
       a = RG(ones(Int, order(G)))
 
       @testset "scalar operators" begin
@@ -156,6 +167,9 @@ using Nemo
                2*one(RG) - RG(g) - RG(inv(g))
             @test GroupRings.augmentation((one(RG)-RG(g))) == 0
          end
+
+         b = RG(1) + GroupRings.star(a)
+         @test a*b == mul!(a,a,b)
 
          z = sum((one(RG)-RG(g))*GroupRings.star(one(RG)-RG(g)) for g in elements(G))
 
