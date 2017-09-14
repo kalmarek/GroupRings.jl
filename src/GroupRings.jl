@@ -11,6 +11,8 @@ import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize,
 #
 ###############################################################################
 
+baseless_warn = false
+
 type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    group::Gr
    basis::Vector{T}
@@ -232,7 +234,7 @@ function show(io::IO, X::GroupRingElem)
       end
       print(io, str)
    else
-      warn("Basis of the parent Group is not defined, showing coeffs")
+      baseless_warn && warn("Basis of the parent Group is not defined, showing coeffs")
       show(io, MIME("text/plain"), X.coeffs)
    end
 end
@@ -257,7 +259,7 @@ function (==)(A::GroupRing, B::GroupRing)
    if isdefined(A, :basis) && isdefined(B, :basis)
       A.basis == B.basis || return false
    else
-      warn("Bases of GroupRings are not defined, comparing products mats.")
+      baseless_warn && warn("Bases of GroupRings are not defined, comparing products mats.")
       A.pm == B.pm || return false
    end
    return true
@@ -518,7 +520,7 @@ function reverse_dict(iter)
 end
 
 function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
-   limit::Int=length(basis); twisted::Bool=false)
+   limit::Int=length(basis); twisted::Bool=false, check=true)
    product_matrix = zeros(Int, (limit,limit))
    Threads.@threads for i in 1:limit
       x = basis[i]
@@ -526,10 +528,27 @@ function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
          x = inv(x)
       end
       for j in 1:limit
-         product_matrix[i,j] = basis_dict[x*(basis[j])]
+         product_matrix[i,j] = basis_dict[x*basis[j]]
       end
    end
+
+   check && check_pm(product_matrix, basis, twisted)
+
    return product_matrix
+end
+
+function check_pm(product_matrix, basis, twisted)
+   idx = findfirst(product_matrix' .== 0)
+   if idx != 0
+      warn("Product is not supported on basis")
+      i,j = ind2sub(product_matrix, idx)
+      x = basis[i]
+      if twisted
+         x = inv(x)
+      end
+      throw(KeyError(x*basis[j]))
+   end
+   return true
 end
 
 create_pm{T<:GroupElem}(b::Vector{T}) = create_pm(b, reverse_dict(b))
@@ -539,12 +558,21 @@ function complete!(RG::GroupRing)
       RG.basis = [elements(RG.group)...]
    end
 
-   fastm!(RG, fill=true)
+   fastm!(RG, fill=false)
 
+   warning = false
    for linidx in find(RG.pm .== 0)
       i,j = ind2sub(size(RG.pm), linidx)
-      RG.pm[i,j] = RG.basis_dict[RG.basis[i]*RG.basis[j]]
+      g = RG.basis[i]*RG.basis[j]
+      if haskey(RG.basis_dict, g)
+          RG.pm[i,j] = RG.basis_dict[g]
+      else
+         if !warning
+            warning = true
+         end
+      end
    end
+   warning && warn("Some products were not supported on basis")
    return RG
 end
 

@@ -44,7 +44,6 @@ using Nemo
       F = FreeGroup(3)
       S = gens(F)
       append!(S, [inv(s) for s in S])
-      S = unique(S)
 
       basis, sizes = Groups.generate_balls(S, F(), radius=4)
       d = GroupRings.reverse_dict(basis)
@@ -57,6 +56,15 @@ using Nemo
       A = GroupRing(F, basis, pm)
       B = GroupRing(F, basis, d, pm)
       @test A == B
+
+      RF = GroupRing(F, basis, d, create_pm(basis, d, check=false))
+      nz1 = countnz(RF.pm)
+      @test nz1 > 1000
+
+      GroupRings.complete!(RF)
+      nz2 = countnz(RF.pm)
+      @test nz2 > nz1
+      @test nz2 == 45469
 
       g = B()
       s = S[2]
