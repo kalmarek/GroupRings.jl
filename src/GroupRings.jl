@@ -13,7 +13,7 @@ import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize,
 
 baseless_warn = false
 
-type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
+mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    group::Gr
    basis::Vector{T}
    basis_dict::Dict{T, Int}
@@ -36,19 +36,22 @@ type GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    end
 end
 
-GroupRing{Gr<:Group, T<:GroupElem}(G::Gr, basis::Vector{T}; fastm::Bool=true) =
-   GroupRing{Gr, T}(G, basis, fastm=fastm)
+function GroupRing(G::Gr, basis::Vector{T}; fastm::Bool=true) where {Gr<:Group, T<:GroupElem}
+   return GroupRing{Gr, T}(G, basis, fastm=fastm)
+end
 
-GroupRing(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) where {Gr<:Group, T<:GroupElem} = GroupRing{Gr, T}(G, b, b_d, pm)
+function GroupRing(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) where {Gr<:Group, T<:GroupElem}
+   return GroupRing{Gr, T}(G, b, b_d, pm)
+end
 
-GroupRing{Gr<:Group}(G::Gr, pm::Array{Int,2}) =
+GroupRing(G::Gr, pm::Array{Int,2}) where {Gr<:Group} =
    GroupRing{Gr, elem_type(G)}(G, pm)
 
-type GroupRingElem{T<:Number} <: RingElem
-   coeffs::AbstractVector{T}
+mutable struct GroupRingElem{T, A<:AbstractVector} <: RingElem
+   coeffs::A
    parent::GroupRing
 
-   function GroupRingElem{T}(c::AbstractVector{T}, RG::GroupRing, check=true) where {T<:Number}
+   function GroupRingElem{T, A}(c::AbstractVector{T}, RG::GroupRing, check=true) where {T, A}
       if check
          if isdefined(RG, :basis)
             length(c) == length(RG.basis) || throw(
@@ -70,17 +73,20 @@ export GroupRing, GroupRingElem, complete!, create_pm, star
 #
 ###############################################################################
 
-elem_type{T,S}(::Type{GroupRing{T,S}}) = GroupRingElem
-
-parent_type(::Type{GroupRingElem}) = GroupRing
+elem_type(::Type{GroupRing}) = GroupRingElem
 
 eltype(X::GroupRingElem) = eltype(X.coeffs)
 
 parent(g::GroupRingElem) = g.parent
 
-Base.promote_rule{T<:Number,S<:Number}(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) = GroupRingElem{promote_type(T,S)}
+parent_type(X::GroupRingElem) = typeof(parent(X))
 
-function convert{T<:Number}(::Type{T}, X::GroupRingElem)
+import Base.promote_rule
+
+promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
+   GroupRingElem{promote_type(T,S)}
+
+function convert(::Type{T}, X::GroupRingElem) where {T}
    return GroupRingElem(convert(AbstractVector{T}, X.coeffs), parent(X))
 end
 
@@ -90,8 +96,8 @@ end
 #
 ###############################################################################
 
-function GroupRingElem{T<:Number}(c::AbstractVector{T}, RG::GroupRing)
-   return GroupRingElem{T}(c, RG)
+function GroupRingElem(c::AbstractVector, RG::GroupRing)
+   return GroupRingElem{eltype(c), typeof(c)}(c, RG)
 end
 
 function GroupRing(G::Group; fastm::Bool=false)
@@ -112,7 +118,7 @@ end
 
 zero(RG::GroupRing, T::Type=Int) = RG(T)
 one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
-one{R<:Nemo.Ring, S<:Nemo.RingElem}(RG::GroupRing{R,S}) = RG(eye(RG.group()))
+one(RG::GroupRing{R}, T::Type=Int) where {R<:Nemo.Ring} = RG(one(RG.group()), T)
 
 function (RG::GroupRing)(i::Int, T::Type=Int)
    elt = RG(T)
@@ -120,9 +126,9 @@ function (RG::GroupRing)(i::Int, T::Type=Int)
    return elt
 end
 
-function (RG::GroupRing{R,S}){R<:Ring, S}(i::Int, T::Type=Int)
+function (RG::GroupRing{R})(i::Int, T::Type=Int) where {R<:Ring}
    elt = RG(T)
-   elt[eye(RG.group())] = i
+   elt[one(RG.group())] = i
    return elt
 end
 
