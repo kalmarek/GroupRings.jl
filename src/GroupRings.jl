@@ -86,8 +86,8 @@ import Base.promote_rule
 promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
    GroupRingElem{promote_type(T,S)}
 
-function convert(::Type{T}, X::GroupRingElem) where {T}
-   return GroupRingElem(convert(AbstractVector{T}, X.coeffs), parent(X))
+function convert(::Type{T}, X::GroupRingElem) where {T<:Number}
+   return GroupRingElem(T.(X.coeffs), parent(X))
 end
 
 ###############################################################################
