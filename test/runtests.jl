@@ -127,13 +127,17 @@ using Nemo
          @test eltype(2*a) == typeof(2)
          @test (2*a).coeffs == 2.*(a.coeffs)
 
-         @test isa(2.0*a, GroupRingElem)
-         @test eltype(2.0*a) == typeof(2.0)
-         @test (2.0*a).coeffs == 2.0.*(a.coeffs)
+         ww = "Scalar and coeffs are in different rings! Promoting result to Float64"
 
-         @test isa(a/2, GroupRingElem)
-         @test eltype(a/2) == typeof(1/2)
-         @test (a/2).coeffs == 0.5*(a.coeffs)
+         @test isa(2.0*a, GroupRingElem)
+         @test_warn ww eltype(2.0*a) == typeof(2.0)
+         @test_warn ww (2.0*a).coeffs == 2.0.*(a.coeffs)
+
+         @test_warn ww (a/2).coeffs == a.coeffs./2
+         b = a/2
+         @test isa(b, GroupRingElem)
+         @test eltype(b) == typeof(1/2)
+         @test (b/2).coeffs == 0.25*(a.coeffs)
 
          @test isa(convert(Rational{Int}, a), GroupRingElem)
          @test eltype(convert(Rational{Int}, a)) == Rational{Int}
