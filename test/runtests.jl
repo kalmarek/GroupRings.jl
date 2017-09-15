@@ -16,6 +16,8 @@ using Nemo
       @test isdefined(RG, :basis_dict) == true
       @test isdefined(RG, :pm) == false
 
+      @test isa(GroupRing(PermutationGroup(6), rand(1:6, 6,6)), GroupRing)
+
       RG = GroupRing(G, fastm=true)
       @test isdefined(RG, :pm) == true
       @test RG.pm == zeros(Int, (6,6))
