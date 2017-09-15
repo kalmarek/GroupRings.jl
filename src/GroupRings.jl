@@ -295,7 +295,7 @@ end
 (*)(X::GroupRingElem, a) = mul(a,X)
 
 # disallow Nemo.Rings to hijack *(::Integer, ::RingElem)
-(*){T<:Integer}(a::T, X::GroupRingElem) = mul(a,X)
+(*)(a::Union{Integer, Rational}, X::GroupRingElem) = mul(a,X)
 
 (/)(X::GroupRingElem, a) = 1/a*X
 
