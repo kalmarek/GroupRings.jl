@@ -45,13 +45,13 @@ function GroupRing(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) wher
 end
 
 GroupRing(G::Gr, pm::Array{Int,2}) where {Gr<:Group} =
-   GroupRing{Gr, elem_type(G)}(G, pm)
+   GroupRing{Gr}(G, pm)
 
-mutable struct GroupRingElem{T, A<:AbstractVector} <: RingElem
+mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: RingElem
    coeffs::A
-   parent::GroupRing
+   parent::GR
 
-   function GroupRingElem{T, A}(c::AbstractVector{T}, RG::GroupRing, check=true) where {T, A}
+   function GroupRingElem{T, A, GR}(c::AbstractVector{T}, RG::GR, check=true) where {T, A, GR}
       if check
          if isdefined(RG, :basis)
             length(c) == length(RG.basis) || throw(
@@ -97,7 +97,7 @@ end
 ###############################################################################
 
 function GroupRingElem(c::AbstractVector, RG::GroupRing)
-   return GroupRingElem{eltype(c), typeof(c)}(c, RG)
+   return GroupRingElem{eltype(c), typeof(c), typeof(RG)}(c, RG)
 end
 
 function GroupRing(G::Group; fastm::Bool=false)
