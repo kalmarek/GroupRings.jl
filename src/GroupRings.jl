@@ -412,9 +412,9 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
          end
       end
    else
-      for j::Int in 1:lY
+      for j in 1:lY
          if Y.coeffs[j] != z
-            for i::Int in 1:lX
+            for i in 1:lX
                if X.coeffs[i] != z
                   result[RG.basis[i]*RG.basis[j]] += X[i]*Y[j]
                end
