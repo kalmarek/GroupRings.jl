@@ -339,8 +339,8 @@ doc"""
                  X::AbstractVector,
                  Y::AbstractVector,
                 pm::Array{Int,2})
-> The most specialised multiplication for `X` and `Y` (`coeffs` of
-> `GroupRingElems`) using multiplication table `pm`.
+> The most specialised multiplication for `X` and `Y` (intended for `coeffs` of
+> `GroupRingElems`), using multiplication table `pm`.
 > Notes:
 > * this method will silently produce false results if `X[k]` is non-zero for
 > `k > size(pm,1)`.
@@ -377,7 +377,7 @@ doc"""
 > In-place multiplication for `GroupRingElem`s `X` and `Y`.
 > `mul!` will make use the initialised entries of `pm` attribute of
 > `parent(X)::GroupRing` (if available), and will compute and store in `pm` the
-> remaining products.
+> remaining products necessary to perform the multiplication.
 > The method will fail with `KeyError` if product `X*Y` is not supported on
 > `parent(X).basis`.
 """
