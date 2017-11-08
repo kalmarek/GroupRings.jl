@@ -1,3 +1,4 @@
+__precompile__()
 module GroupRings
 
 using Nemo
