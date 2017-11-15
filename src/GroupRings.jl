@@ -11,7 +11,7 @@ import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize,
 #
 ###############################################################################
 
-baseless_warn = false
+global baseless_warn = false
 
 mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    group::Gr
