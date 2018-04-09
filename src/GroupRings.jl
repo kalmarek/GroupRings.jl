@@ -102,7 +102,7 @@ function GroupRingElem(c::AbstractVector, RG::GroupRing)
 end
 
 function GroupRing(G::Group; fastm::Bool=false)
-   return GroupRing(G, [elements(G)...], fastm=fastm)
+   return GroupRing(G, vec(collect(elements(G))), fastm=fastm)
 end
 
 function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
