@@ -521,10 +521,12 @@ function rationalize{T<:Integer, S<:Number}(::Type{T}, X::GroupRingElem{S};
    return GroupRingElem(v, parent(X))
 end
 
-function reverse_dict(iter)
-   T = eltype(iter)
-   return Dict{T, Int}(x => i for (i,x) in enumerate(iter))
+function reverse_dict(::Type{I}, iter) where I<:Integer
+   length(iter) > typemax(I) && error("Can not produce reverse dict: $(length(iter)) is too large for $T")
+   return Dict{eltype(iter), I}(x => i for (i,x) in enumerate(iter))
 end
+
+reverse_dict(iter) = reverse_dict(UInt, iter)
 
 function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
    limit::Int=length(basis); twisted::Bool=false, check=true)
