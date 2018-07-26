@@ -1,8 +1,8 @@
 __precompile__()
 module GroupRings
 
-using Nemo
-import Nemo: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, mul!, addeq!, divexact
+using AbstractAlgebra
+import AbstractAlgebra: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, mul!, addeq!, divexact
 
 import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize, deepcopy_internal, getindex, setindex!, eltype, one, zero
 
@@ -119,7 +119,7 @@ end
 
 zero(RG::GroupRing, T::Type=Int) = RG(T)
 one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
-one(RG::GroupRing{R}, T::Type=Int) where {R<:Nemo.Ring} = RG(one(RG.group()), T)
+one(RG::GroupRing{R}, T::Type=Int) where {R<:Ring} = RG(one(RG.group()), T)
 
 function (RG::GroupRing)(i::Int, T::Type=Int)
    elt = RG(T)
@@ -153,7 +153,7 @@ function (RG::GroupRing){T<:Number}(x::AbstractVector{T})
    return result
 end
 
-function (RG::GroupRing{Gr,T}){Gr<:Nemo.Group, T<:Nemo.GroupElem}(V::Vector{T},
+function (RG::GroupRing{Gr,T}){Gr<:Group, T<:GroupElem}(V::Vector{T},
    S::Type=Rational{Int}; alt=false)
     res = RG(S)
     for g in V
@@ -295,8 +295,8 @@ end
 (*)(a, X::GroupRingElem) = mul(a,X)
 (*)(X::GroupRingElem, a) = mul(a,X)
 
-# disallow Nemo.Rings to hijack *(::, ::GroupRingElem)
-*(a::Union{AbstractFloat, Integer, Nemo.RingElem, Rational}, X::GroupRingElem) = mul(a,X)
+# disallow Rings to hijack *(::, ::GroupRingElem)
+*(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = mul(a,X)
 
 (/)(X::GroupRingElem, a) = 1/a*X
 
@@ -526,7 +526,7 @@ function reverse_dict(::Type{I}, iter) where I<:Integer
    return Dict{eltype(iter), I}(x => i for (i,x) in enumerate(iter))
 end
 
-reverse_dict(iter) = reverse_dict(UInt, iter)
+reverse_dict(iter) = reverse_dict(Int, iter)
 
 function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
    limit::Int=length(basis); twisted::Bool=false, check=true)

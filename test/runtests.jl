@@ -1,13 +1,13 @@
-using GroupRings
 using Base.Test
 
-using Nemo
+using AbstractAlgebra
+using GroupRings
 
 @testset "GroupRings" begin
    @testset "Constructors: PermutationGroup" begin
       G = PermutationGroup(3)
 
-      @test isa(GroupRing(G), Nemo.Ring)
+      @test isa(GroupRing(G), AbstractAlgebra.Ring)
       @test isa(GroupRing(G), GroupRing)
 
       RG = GroupRing(G)
