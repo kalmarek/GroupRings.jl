@@ -96,8 +96,8 @@ using Nemo
       @test a[5] == 1
       @test a[p] == 1
 
-      @test string(a) == "1*[2, 3, 1]"
-      @test string(-a) == "- 1*[2, 3, 1]"
+      @test string(a) == "1*(1,2,3)"
+      @test string(-a) == "- 1*(1,2,3)"
 
       @test RG([0,0,0,0,1,0]) == a
 
@@ -109,8 +109,8 @@ using Nemo
       @test a[1] == 2
       @test a[s] == 2
 
-      @test string(a) == "2*[1, 2, 3] + 1*[2, 3, 1]"
-      @test string(-a) == "- 2*[1, 2, 3] - 1*[2, 3, 1]"
+      @test string(a) == "2*() + 1*(1,2,3)"
+      @test string(-a) == "- 2*() - 1*(1,2,3)"
 
       @test length(a) == 2
    end
