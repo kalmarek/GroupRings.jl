@@ -207,7 +207,7 @@ end
 
 function setindex!(X::GroupRingElem, value, g::GroupElem)
    RG = parent(X)
-   typeof(g) == elem_type(RG.group) || throw("$g is not an element of $(RG.group)")
+   # typeof(g) == elem_type(RG.group) || throw("$g is not an element of $(RG.group): $(typeof(g)) != $(elem_type(RG.group))")
    if !(g in keys(RG.basis_dict))
       g = (RG.group)(g)
    end
