@@ -66,7 +66,7 @@ mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: RingElem
    end
 end
 
-export GroupRing, GroupRingElem, complete!, create_pm, star
+export GroupRing, GroupRingElem, complete!, create_pm, star, aug, supp
 
 ###############################################################################
 #
@@ -509,7 +509,9 @@ length(X::GroupRingElem) = countnz(X.coeffs)
 
 norm(X::GroupRingElem, p=2) = norm(X.coeffs, p)
 
-augmentation(X::GroupRingElem) = sum(X.coeffs)
+aug(X::GroupRingElem) = sum(X.coeffs)
+
+supp(X::GroupRingElem) = parent(X).basis[findn(X.coeffs)]
 
 function rationalize{T<:Integer, S<:Integer}(::Type{T}, X::GroupRingElem{S})
    return convert(Rational{T}, X)
