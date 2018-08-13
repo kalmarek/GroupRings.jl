@@ -308,28 +308,20 @@ end
 ###############################################################################
 
 function addeq!{T}(X::GroupRingElem{T}, Y::GroupRingElem{T})
-   X.coeffs .+= Y.coeffs
+   X.coeffs += Y.coeffs
    return X
 end
 
-function add{T<:Number}(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true)
-   if check
-      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
-   end
+function +(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T
    return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
-function add{T<:Number, S<:Number}(X::GroupRingElem{T},
-   Y::GroupRingElem{S}, check::Bool=true)
-   if check
-      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
-   end
-   warn("Adding elements with different base rings!")
-   return GroupRingElem(+(promote(X.coeffs, Y.coeffs)...), parent(X))
+function +(X::GroupRingElem{T}, Y::GroupRingElem{S}) where {T,S}
+   warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
+   return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
-(+)(X::GroupRingElem, Y::GroupRingElem) = add(X,Y)
-(-)(X::GroupRingElem, Y::GroupRingElem) = add(X,-Y)
+(-)(X::GroupRingElem, Y::GroupRingElem) = addeq!((-Y), X)
 
 doc"""
     mul!{T}(result::AbstractArray{T},
