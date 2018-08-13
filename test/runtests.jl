@@ -156,7 +156,7 @@ using GroupRings
 
          @test isa(a//1, GroupRingElem)
          @test eltype(a//1) == Rational{Int}
-         @test_throws MethodError (1.0*a)//1
+         @test (1.0a)//1 == (1.0a)
 
       end
 
@@ -176,20 +176,21 @@ using GroupRings
          end
 
          for g in elements(G)
-            @test GroupRings.star(RG(g)) == RG(inv(g))
-            @test (one(RG)-RG(g))*GroupRings.star(one(RG)-RG(g)) ==
+            @test star(RG(g)) == RG(inv(g))
+            @test (one(RG)-RG(g))*star(one(RG)-RG(g)) ==
                2*one(RG) - RG(g) - RG(inv(g))
-            @test GroupRings.augmentation((one(RG)-RG(g))) == 0
+            @test aug((one(RG)-RG(g))) == 0
          end
 
-         b = RG(1) + GroupRings.star(a)
+         b = RG(1) + star(a)
          @test a*b == mul!(a,a,b)
 
-         z = sum((one(RG)-RG(g))*GroupRings.star(one(RG)-RG(g)) for g in elements(G))
+         z = sum((one(RG)-RG(g))*star(one(RG)-RG(g)) for g in elements(G))
 
-         @test GroupRings.augmentation(z) == 0
+         @test aug(z) == 0
 
-         @test rationalize(Int, z) == convert(Rational{Int}, z)
+         @test supp(z) == parent(z).basis
+         @test supp(RG(1) + RG(perm"(2,3)")) == [G(), perm"(2,3)"]
       end
 
    end
