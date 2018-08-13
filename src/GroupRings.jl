@@ -4,7 +4,7 @@ module GroupRings
 using AbstractAlgebra
 import AbstractAlgebra: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, mul!, addeq!, divexact
 
-import Base: convert, show, hash, ==, +, -, *, //, /, length, norm, rationalize, deepcopy_internal, getindex, setindex!, eltype, one, zero
+import Base: convert, show, hash, ==, +, -, *, //, /, length, norm,  deepcopy_internal, getindex, setindex!, eltype, one, zero
 
 ###############################################################################
 #
@@ -493,16 +493,6 @@ norm(X::GroupRingElem, p=2) = norm(X.coeffs, p)
 aug(X::GroupRingElem) = sum(X.coeffs)
 
 supp(X::GroupRingElem) = parent(X).basis[findn(X.coeffs)]
-
-function rationalize{T<:Integer, S<:Integer}(::Type{T}, X::GroupRingElem{S})
-   return convert(Rational{T}, X)
-end
-
-function rationalize{T<:Integer, S<:Number}(::Type{T}, X::GroupRingElem{S};
-   tol=eps(S))
-   v = rationalize(T, X.coeffs, tol=tol)
-   return GroupRingElem(v, parent(X))
-end
 
 function reverse_dict(::Type{I}, iter) where I<:Integer
    length(iter) > typemax(I) && error("Can not produce reverse dict: $(length(iter)) is too large for $T")
