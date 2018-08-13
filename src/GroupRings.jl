@@ -12,8 +12,6 @@ import Base: convert, show, hash, ==, +, -, *, //, /, length, norm,  deepcopy_in
 #
 ###############################################################################
 
-global baseless_warn = false
-
 mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    group::Gr
    basis::Vector{T}
@@ -238,7 +236,7 @@ function show(io::IO, X::GroupRingElem)
       end
       print(io, str)
    else
-      baseless_warn && warn("Basis of the parent Group is not defined, showing coeffs")
+      warn("Basis of the parent Group is not defined, showing coeffs")
       show(io, MIME("text/plain"), X.coeffs)
    end
 end
