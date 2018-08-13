@@ -153,12 +153,9 @@ function (RG::GroupRing){T<:Number}(x::AbstractVector{T})
    return result
 end
 
-function (RG::GroupRing{Gr,T}){Gr<:Group, T<:GroupElem}(V::Vector{T},
-   S::Type=Rational{Int}; alt=false)
-    res = RG(S)
-    for g in V
-        c = (alt ? sign(g)*one(S) : one(S))
-        res[g] += c/length(V)
+function (RG::GroupRing{Gr,T}){Gr<:Group, T<:GroupElem}(V::Vector{T}, S::Type=Int)
+   res = RG(S)
+   for g in V
     end
     return res
 end
