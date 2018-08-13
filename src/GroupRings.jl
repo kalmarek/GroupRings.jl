@@ -250,22 +250,24 @@ end
 ###############################################################################
 
 function (==)(X::GroupRingElem, Y::GroupRingElem)
-   parent(X) == parent(Y) || return false
    if eltype(X.coeffs) != eltype(Y.coeffs)
       warn("Comparing elements with different coeffs Rings!")
    end
-   all(X.coeffs .== Y.coeffs) || return false
+   suppX = supp(X)
+   suppX == supp(Y) || return false
+
+   for g in suppX
+      X[g] == Y[g] || return false
+   end
+
    return true
 end
 
 function (==)(A::GroupRing, B::GroupRing)
    A.group == B.group || return false
-   if isdefined(A, :basis) && isdefined(B, :basis)
-      A.basis == B.basis || return false
-   else
-      baseless_warn && warn("Bases of GroupRings are not defined, comparing products mats.")
-      A.pm == B.pm || return false
-   end
+   complete!(A)
+   complete!(B)
+   A.pm == B.pm || return false
    return true
 end
 
