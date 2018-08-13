@@ -299,17 +299,7 @@ end
 *(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = mul(a,X)
 
 (/)(X::GroupRingElem, a) = 1/a*X
-
-function (//){T<:Integer, S<:Integer}(X::GroupRingElem{T}, a::S)
-   U = typeof(X[1]//a)
-   warn("Rational division: promoting result to $U")
-   return convert(U, X)//a
-end
-
-(//){T<:Rational, S<:Rational}(X::GroupRingElem{T}, a::S) =
-   GroupRingElem(X.coeffs//a, parent(X))
-
-(//){T<:Rational, S<:Integer}(X::GroupRingElem{T}, a::S) = X//convert(T,a)
+(//)(X::GroupRingElem, a::Union{Integer, Rational}) = 1//a*X
 
 ###############################################################################
 #
