@@ -165,6 +165,15 @@ using GroupRings
          a = RG(ones(Int, order(G)))
          b = sum((-1)^parity(g)*RG(g) for g in elements(G))
          @test 1/2*(a+b).coeffs == [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
+
+         a = RG(1) + RG(perm"(2,3)") + RG(perm"(1,2,3)")
+         b = RG(1) - RG(perm"(1,2)(3)") - RG(perm"(1,2,3)")
+
+         @test a - b == RG(perm"(2,3)") + RG(perm"(1,2)(3)") + 2RG(perm"(1,2,3)")
+
+         @test 1//2*2a == a
+         @test a + 2a == (3//1)*a
+         @test 2a - (1//1)*a == a
       end
 
       @testset "Multiplicative structure" begin

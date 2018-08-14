@@ -301,7 +301,7 @@ end
 #
 ###############################################################################
 
-function addeq!(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T
+function addeq!(X::GroupRingElem, Y::GroupRingElem)
    X.coeffs += Y.coeffs
    return X
 end
@@ -310,12 +310,17 @@ function +(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T
    return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
-function +(X::GroupRingElem{T}, Y::GroupRingElem{S}) where {T,S}
+function +(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
    warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
    return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
-(-)(X::GroupRingElem, Y::GroupRingElem) = addeq!((-Y), X)
+-(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T = addeq!((-Y), X)
+
+function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
+   warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
+   addeq!((-Y), X)
+end
 
 doc"""
     mul!(result::AbstractArray{T},
