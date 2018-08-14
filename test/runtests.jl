@@ -191,15 +191,21 @@ using GroupRings
             @test aug((one(RG)-RG(g))) == 0
          end
 
-         b = RG(1) + star(a)
+         a = RG(1) + RG(perm"(2,3)") + RG(perm"(1,2,3)")
+         b = RG(1) - RG(perm"(1,2)(3)") - RG(perm"(1,2,3)")
+
          @test a*b == mul!(a,a,b)
 
-         z = sum((one(RG)-RG(g))*star(one(RG)-RG(g)) for g in elements(G))
+         @test aug(a) == 3
+         @test aug(b) == -1
+         @test aug(a)*aug(b) == aug(a*b) == aug(b*a)
 
+         z = sum((one(RG)-RG(g))*star(one(RG)-RG(g)) for g in elements(G))
          @test aug(z) == 0
 
          @test supp(z) == parent(z).basis
          @test supp(RG(1) + RG(perm"(2,3)")) == [G(), perm"(2,3)"]
+         @test supp(a) == ["perm(3)", perm"(2,3)", perm"(1,2,3)"]
       end
 
    end
