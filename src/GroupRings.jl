@@ -114,9 +114,16 @@ end
 #
 ###############################################################################
 
+# sparse storage:
+
 zero(RG::GroupRing, T::Type=Int) = RG(T)
 one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
 one(RG::GroupRing{R}, T::Type=Int) where {R<:Ring} = RG(one(RG.group()), T)
+
+function (RG::GroupRing)(T::Type=Int)
+   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
+   return GroupRingElem(spzeros(T,length(RG.basis)), RG)
+end
 
 function (RG::GroupRing)(i::Int, T::Type=Int)
    elt = RG(T)
@@ -130,21 +137,9 @@ function (RG::GroupRing{R})(i::Int, T::Type=Int) where {R<:Ring}
    return elt
 end
 
-function (RG::GroupRing)(T::Type=Int)
-   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
-   return GroupRingElem(spzeros(T,length(RG.basis)), RG)
-end
-
 function (RG::GroupRing)(g::GroupElem, T::Type=Int)
    result = RG(T)
    result[RG.group(g)] = one(T)
-   return result
-end
-
-function (RG::GroupRing)(x::AbstractVector{T}) where {T<:Number}
-   length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
-   result = RG(T)
-   result.coeffs = x
    return result
 end
 
@@ -156,20 +151,26 @@ function (RG::GroupRing{Gr,T})(V::Vector{T}, S::Type=Int) where {Gr<:Group, T<:G
     return res
 end
 
+# keep storage type
+
+function (RG::GroupRing)(x::AbstractVector{T}) where T
+   length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
+   return GroupRingElem(x, RG)
+end
+
 function (RG::GroupRing)(X::GroupRingElem)
    RG == parent(X) || throw("Can not coerce!")
    return RG(X.coeffs)
 end
 
-function (RG::GroupRing)(X::GroupRingElem, emb::Function)
+function (RG::GroupRing)(f::Function, X::GroupRingElem)
    isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
-   result = RG(eltype(X.coeffs))
-   T = typeof(X.coeffs)
-   result.coeffs = T(result.coeffs)
-   for g in parent(X).basis
-      result[emb(g)] = X[g]
+   res = RG(zeros(X.coeffs))
+
+   for g in RG.basis
+      res[f(g)] = X[g]
    end
-   return result
+   return res
 end
 
 ###############################################################################
