@@ -59,11 +59,31 @@ mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: RingElem
             warn("Basis of the GroupRing is not defined.")
          end
       end
-      return new(c, RG)
+      return new{T, A, GR}(c, RG)
    end
 end
 
 export GroupRing, GroupRingElem, complete!, create_pm, star, aug, supp
+
+###############################################################################
+#
+#   GroupRing / GroupRingElem constructors
+#
+###############################################################################
+
+function GroupRingElem(c::AbstractVector, RG::GroupRing)
+   return GroupRingElem{eltype(c), typeof(c), typeof(RG)}(c, RG)
+end
+
+function GroupRing(G::Group; fastm::Bool=false)
+   return GroupRing(G, vec(collect(elements(G))), fastm=fastm)
+end
+
+function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
+   size(pm,1) == size(pm,2) || throw("pm must be square, got $(size(pm))")
+   eltype(basis) == elem_type(G) || throw("Basis must consist of elements of $G")
+   return GroupRing(G, basis, reverse_dict(basis), pm)
+end
 
 ###############################################################################
 #
@@ -86,26 +106,6 @@ promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
 
 function convert(::Type{T}, X::GroupRingElem) where {T<:Number}
    return GroupRingElem(Vector{T}(X.coeffs), parent(X))
-end
-
-###############################################################################
-#
-#   GroupRing / GroupRingElem constructors
-#
-###############################################################################
-
-function GroupRingElem(c::AbstractVector, RG::GroupRing)
-   return GroupRingElem{eltype(c), typeof(c), typeof(RG)}(c, RG)
-end
-
-function GroupRing(G::Group; fastm::Bool=false)
-   return GroupRing(G, vec(collect(elements(G))), fastm=fastm)
-end
-
-function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
-   size(pm,1) == size(pm,2) || throw("pm must be square, got $(size(pm))")
-   eltype(basis) == elem_type(G) || throw("Basis must consist of elements of $G")
-   return GroupRing(G, basis, reverse_dict(basis), pm)
 end
 
 ###############################################################################
@@ -153,7 +153,7 @@ end
 
 # keep storage type
 
-function (RG::GroupRing)(x::AbstractVector{T}) where T
+function (RG::GroupRing)(x::AbstractVector{T}) where T<:Number
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    return GroupRingElem(x, RG)
 end
