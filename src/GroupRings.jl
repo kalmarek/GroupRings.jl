@@ -209,6 +209,16 @@ end
 Base.size(X::GroupRingElem) = size(X.coeffs)
 Base.IndexStyle(::Type{GroupRingElem}) = Base.LinearFast()
 
+function Base.full(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector}
+   return parent(X)(full(X.coeffs))
+end
+Base.full(X::GroupRingElem{T, A}) where {T, A<:Vector} = X
+
+Base.sparse(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector} = X
+function Base.sparse(X::GroupRingElem{T, A}) where {T, A<:Vector}
+   return parent(X)(sparse(X.coeffs))
+end
+
 ###############################################################################
 #
 #   String I/O
