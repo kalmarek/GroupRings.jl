@@ -205,7 +205,7 @@ using GroupRings
 
          @test supp(z) == parent(z).basis
          @test supp(RG(1) + RG(perm"(2,3)")) == [G(), perm"(2,3)"]
-         @test supp(a) == ["perm(3)", perm"(2,3)", perm"(1,2,3)"]
+         @test supp(a) == [perm"(3)", perm"(2,3)", perm"(1,2,3)"]
       end
 
    end
