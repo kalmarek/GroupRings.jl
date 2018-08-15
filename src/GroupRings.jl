@@ -151,6 +151,15 @@ function (RG::GroupRing{Gr,T})(V::Vector{T}, S::Type=Int) where {Gr<:Group, T<:G
     return res
 end
 
+function (RG::GroupRing)(f::Function, X::GroupRingElem{T}) where T
+   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
+   res = RG(T)
+   for g in supp(X)
+      res[f(g)] = X[g]
+   end
+   return res
+end
+
 # keep storage type
 
 function (RG::GroupRing)(x::AbstractVector{T}) where T<:Number
@@ -161,16 +170,6 @@ end
 function (RG::GroupRing)(X::GroupRingElem)
    RG == parent(X) || throw("Can not coerce!")
    return RG(X.coeffs)
-end
-
-function (RG::GroupRing)(f::Function, X::GroupRingElem)
-   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
-   res = RG(zeros(X.coeffs))
-
-   for g in RG.basis
-      res[f(g)] = X[g]
-   end
-   return res
 end
 
 ###############################################################################
