@@ -261,8 +261,12 @@ end
 
 function (==)(A::GroupRing, B::GroupRing)
    A.group == B.group || return false
-   complete!(A)
-   complete!(B)
+   if isdefined(A, :basis)
+      complete!(A)
+   end
+   if isdefined(B, :basis)
+      complete!(B)
+   end
    A.pm == B.pm || return false
    return true
 end
@@ -523,10 +527,7 @@ end
 create_pm{T<:GroupElem}(b::Vector{T}) = create_pm(b, reverse_dict(b))
 
 function complete!(RG::GroupRing)
-   if !isdefined(RG, :basis)
-      RG.basis = collect(elements(RG.group))
-   end
-
+   isdefined(RG, :basis) || throw(ArgumentError("Provide basis for completion first!"))
    fastm!(RG, fill=false)
 
    warning = false
