@@ -163,6 +163,7 @@ end
 # keep storage type
 
 function (RG::GroupRing)(x::AbstractVector{T}) where T<:Number
+   isdefined(RG, :basis) || throw("Basis of GroupRing not defined. For advanced use the direct constructor of GroupRingElem is provided.")
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    return GroupRingElem(x, RG)
 end
