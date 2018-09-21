@@ -185,10 +185,6 @@ end
 #
 ###############################################################################
 
-function deepcopy_internal(X::GroupRingElem, dict::ObjectIdDict)
-   return GroupRingElem(deepcopy(X.coeffs), parent(X))
-end
-
 function hash(X::GroupRingElem, h::UInt)
    return hash(X.coeffs, hash(parent(X), hash(GroupRingElem, h)))
 end
