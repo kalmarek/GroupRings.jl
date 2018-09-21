@@ -2,9 +2,15 @@ __precompile__()
 module GroupRings
 
 using AbstractAlgebra
-import AbstractAlgebra: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, mul!, addeq!, divexact
+import AbstractAlgebra: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, addeq!, mul!
 
-import Base: convert, show, hash, ==, +, -, *, //, /, length, norm,  deepcopy_internal, getindex, setindex!, eltype, one, zero
+using SparseArrays
+import SparseArrays: sparse
+using LinearAlgebra
+import LinearAlgebra: norm
+using Markdown
+
+import Base: convert, show, hash, ==, +, -, *, //, /, length, getindex, setindex!, eltype, one, zero
 
 ###############################################################################
 #
@@ -215,8 +221,8 @@ function Base.full(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector}
 end
 Base.full(X::GroupRingElem{T, A}) where {T, A<:Vector} = X
 
-Base.sparse(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector} = X
-function Base.sparse(X::GroupRingElem{T, A}) where {T, A<:Vector}
+sparse(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector} = X
+function sparse(X::GroupRingElem{T, A}) where {T, A<:Vector}
    return parent(X)(sparse(X.coeffs))
 end
 
@@ -236,8 +242,8 @@ function show(io::IO, X::GroupRingElem)
       T = eltype(X.coeffs)
       print(io, "$(zero(T))*$((RG.group)())")
    elseif isdefined(RG, :basis)
-      non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findn(X.coeffs))
-      elts = ("$(sign(c)> 0? " + ": " - ")$(abs(c))*$g" for (c,g) in non_zeros)
+      non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findall(!iszero, X.coeffs))
+      elts = ("$(sign(c)> 0 ? " + " : " - ")$(abs(c))*$g" for (c,g) in non_zeros)
       str = join(elts, "")[2:end]
       if sign(first(non_zeros)[1]) > 0
          str = str[3:end]
@@ -337,7 +343,7 @@ function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
    addeq!((-Y), X)
 end
 
-doc"""
+@doc doc"""
     mul!(result::AbstractArray{T},
               X::AbstractVector,
               Y::AbstractVector,
@@ -373,8 +379,8 @@ function mul!(result::AbstractVector{T},
    return result
 end
 
-doc"""
-    mul!{T}(result::GroupRingElem{T},
+@doc doc"""
+    mul!(result::GroupRingElem{T},
                  X::GroupRingElem,
                  Y::GroupRingElem)
 > In-place multiplication for `GroupRingElem`s `X` and `Y`.
@@ -384,11 +390,11 @@ doc"""
 > The method will fail with `KeyError` if product `X*Y` is not supported on
 > `parent(X).basis`.
 """
-function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
+function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    if result === X
       result = deepcopy(result)
    end
-
+   T = eltype(result.coeffs)
    z = zero(T)
    result.coeffs .= z
 
@@ -399,8 +405,10 @@ function mul!{T}(result::GroupRingElem{T}, X::GroupRingElem, Y::GroupRingElem)
 
    if isdefined(RG, :pm)
       s = size(RG.pm)
-      findlast(X.coeffs) <= s[1] || throw("Element in X outside of support of RG.pm")
-      findlast(Y.coeffs) <= s[2] || throw("Element in Y outside of support of RG.pm")
+      k = findprev(!iszero, X.coeffs, lX)
+      (k == nothing ? 0 : k) <= s[1] || throw("Element in X outside of support of RG.pm")
+      k = findprev(!iszero, Y.coeffs, lY)
+      (k == nothing ? 0 : k) <= s[2] || throw("Element in Y outside of support of RG.pm")
 
       for j in 1:lY
          if Y.coeffs[j] != z
@@ -487,13 +495,13 @@ end
 #
 ###############################################################################
 
-length(X::GroupRingElem) = countnz(X.coeffs)
+length(X::GroupRingElem) = count(!iszero, X.coeffs)
 
 norm(X::GroupRingElem, p=2) = norm(X.coeffs, p)
 
 aug(X::GroupRingElem) = sum(X.coeffs)
 
-supp(X::GroupRingElem) = parent(X).basis[findn(X.coeffs)]
+supp(X::GroupRingElem) = parent(X).basis[findall(!iszero, X.coeffs)]
 
 function reverse_dict(::Type{I}, iter) where I<:Integer
    length(iter) > typemax(I) && error("Can not produce reverse dict: $(length(iter)) is too large for $T")
@@ -502,8 +510,8 @@ end
 
 reverse_dict(iter) = reverse_dict(Int, iter)
 
-function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
-   limit::Int=length(basis); twisted::Bool=false, check=true)
+function create_pm(basis::Vector{T}, basis_dict::Dict{T, Int},
+   limit::Int=length(basis); twisted::Bool=false, check=true) where {T<:GroupElem}
    product_matrix = zeros(Int, (limit,limit))
    Threads.@threads for i in 1:limit
       x = basis[i]
@@ -520,11 +528,13 @@ function create_pm{T<:GroupElem}(basis::Vector{T}, basis_dict::Dict{T, Int},
    return product_matrix
 end
 
-function check_pm(product_matrix, basis, twisted)
+create_pm(b::Vector{T}) where {T<:GroupElem} = create_pm(b, reverse_dict(b))
+
+function check_pm(product_matrix, basis, twisted=false)
    idx = findfirst(product_matrix' .== 0)
-   if idx != 0
+   if idx != nothing
       warn("Product is not supported on basis")
-      i,j = ind2sub(product_matrix, idx)
+      i,j = Tuple(idx)
       x = basis[i]
       if twisted
          x = inv(x)
@@ -534,15 +544,13 @@ function check_pm(product_matrix, basis, twisted)
    return true
 end
 
-create_pm{T<:GroupElem}(b::Vector{T}) = create_pm(b, reverse_dict(b))
-
 function complete!(RG::GroupRing)
    isdefined(RG, :basis) || throw(ArgumentError("Provide basis for completion first!"))
    fastm!(RG, fill=false)
 
    warning = false
-   for linidx in find(RG.pm .== 0)
-      i,j = ind2sub(size(RG.pm), linidx)
+   for idx in findall(RG.pm .== 0)
+      i,j = Tuple(idx)
       g = RG.basis[i]*RG.basis[j]
       if haskey(RG.basis_dict, g)
           RG.pm[i,j] = RG.basis_dict[g]
