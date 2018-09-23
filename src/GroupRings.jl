@@ -81,8 +81,8 @@ function GroupRingElem(c::AbstractVector, RG::GroupRing)
    return GroupRingElem{eltype(c), typeof(c), typeof(RG)}(c, RG)
 end
 
-function GroupRing(G::Group; fastm::Bool=false)
-   return GroupRing(G, vec(collect(elements(G))), fastm=fastm)
+function GroupRing(G::Generic.PermGroup; fastm::Bool=false)
+   return GroupRing(G, vec(collect(G)), fastm=fastm)
 end
 
 function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
