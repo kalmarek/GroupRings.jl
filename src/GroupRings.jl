@@ -24,32 +24,22 @@ mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    basis_dict::Dict{T, Int}
    pm::Array{Int,2}
 
-   function GroupRing{Gr, T}(G::Gr, basis::Vector{T}; fastm::Bool=false) where {Gr, T}
-      RG = new(G, basis, reverse_dict(basis))
+   function GroupRing(G::Gr, basis::Vector{T}; fastm::Bool=false) where {Gr, T}
+      RG = new{Gr, T}(G, basis, reverse_dict(basis))
       fastm && fastm!(RG)
       return RG
    end
 
-   function GroupRing{Gr, T}(G::Gr, b::Vector{T}, b_d::Dict{T, Int}, pm::Array{Int,2}) where {Gr,T}
-      return new(G, b, b_d, pm)
+   function GroupRing(G::Gr, b::Vector{T}, b_d::Dict{T, Int}, pm::Array{Int,2}) where {Gr,T}
+      return new{Gr, T}(G, b, b_d, pm)
    end
 
-   function GroupRing{Gr}(G::Gr, pm::Array{Int,2}) where {Gr}
+   function GroupRing(G::Gr, pm::Array{Int,2}) where {Gr}
       RG = new{Gr, elem_type(G)}(G)
       RG.pm = pm
       return RG
    end
 end
-
-function GroupRing(G::Gr, basis::Vector{T}; fastm::Bool=true) where {Gr<:Group, T<:GroupElem}
-   return GroupRing{Gr, T}(G, basis, fastm=fastm)
-end
-
-function GroupRing(G::Gr, b::Vector{T}, b_d::Dict{T,Int}, pm::Array{Int,2}) where {Gr<:Group, T<:GroupElem}
-   return GroupRing{Gr, T}(G, b, b_d, pm)
-end
-
-GroupRing(G::Gr, pm::Array{Int,2}) where {Gr<:Group} = GroupRing{Gr}(G, pm)
 
 mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: RingElem
    coeffs::A
