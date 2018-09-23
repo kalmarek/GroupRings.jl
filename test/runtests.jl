@@ -1,7 +1,9 @@
-using Base.Test
+using Test
 
 using AbstractAlgebra
 using GroupRings
+using SparseArrays
+
 
 @testset "GroupRings" begin
    @testset "Constructors: PermutationGroup" begin
@@ -26,10 +28,10 @@ using GroupRings
       @test all(RG.pm .> 0)
       @test RG.pm == GroupRings.fastm!(GroupRing(G, fastm=false), fill=true).pm
 
-      @test RG.basis_dict == GroupRings.reverse_dict(elements(G))
+      @test RG.basis_dict == GroupRings.reverse_dict(collect(G))
 
-      @test isa(GroupRing(G, collect(elements(G))), GroupRing)
-      S = collect(elements(G))
+      @test isa(GroupRing(G, collect(G)), GroupRing)
+      S = collect(G)
       pm = create_pm(S)
       @test isa(GroupRing(G, S), GroupRing)
       @test isa(GroupRing(G, S, pm), GroupRing)
@@ -60,11 +62,11 @@ using GroupRings
       @test A == B
 
       RF = GroupRing(F, basis, d, create_pm(basis, d, check=false))
-      nz1 = countnz(RF.pm)
+      nz1 = count(!iszero, RF.pm)
       @test nz1 > 1000
 
       GroupRings.complete!(RF)
-      nz2 = countnz(RF.pm)
+      nz2 = count(!iszero, RF.pm)
       @test nz2 > nz1
       @test nz2 == 45469
 
@@ -83,7 +85,7 @@ using GroupRings
       @test isa(GroupRingElem(a, RG), GroupRingElem)
       @test isa(RG(a), GroupRingElem)
 
-      @test all(isa(RG(g), GroupRingElem) for g in elements(G))
+      @test all(isa(RG(g), GroupRingElem) for g in G)
 
       @test_throws String GroupRingElem([1,2,3], RG)
       @test isa(RG(G([2,3,1])), GroupRingElem)
@@ -127,7 +129,7 @@ using GroupRings
 
          @test isa(2*a, GroupRingElem)
          @test eltype(2*a) == typeof(2)
-         @test (2*a).coeffs == 2.*(a.coeffs)
+         @test (2*a).coeffs == 2 .*(a.coeffs)
 
          ww = "Scalar and coeffs are in different rings! Promoting result to Float64"
 
@@ -161,9 +163,9 @@ using GroupRings
       end
 
       @testset "Additive structure" begin
-         @test RG(ones(Int, order(G))) == sum(RG(g) for g in elements(G))
+         @test RG(ones(Int, order(G))) == sum(RG(g) for g in G)
          a = RG(ones(Int, order(G)))
-         b = sum((-1)^parity(g)*RG(g) for g in elements(G))
+         b = sum((-1)^parity(g)*RG(g) for g in G)
          @test 1/2*(a+b).coeffs == [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
 
          a = RG(1) + RG(perm"(2,3)") + RG(perm"(1,2,3)")
@@ -177,14 +179,14 @@ using GroupRings
       end
 
       @testset "Multiplicative structure" begin
-         for g in elements(G), h in elements(G)
+         for g in G, h in G
             a = RG(g)
             b = RG(h)
             @test a*b == RG(g*h)
             @test (a+b)*(a+b) == a*a + a*b + b*a + b*b
          end
 
-         for g in elements(G)
+         for g in G
             @test star(RG(g)) == RG(inv(g))
             @test (one(RG)-RG(g))*star(one(RG)-RG(g)) ==
                2*one(RG) - RG(g) - RG(inv(g))
@@ -200,7 +202,7 @@ using GroupRings
          @test aug(b) == -1
          @test aug(a)*aug(b) == aug(a*b) == aug(b*a)
 
-         z = sum((one(RG)-RG(g))*star(one(RG)-RG(g)) for g in elements(G))
+         z = sum((one(RG)-RG(g))*star(one(RG)-RG(g)) for g in G)
          @test aug(z) == 0
 
          @test supp(z) == parent(z).basis
