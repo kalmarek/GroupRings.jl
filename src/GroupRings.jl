@@ -52,7 +52,7 @@ mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: RingElem
             "Can't create GroupRingElem -- lengths differ: length(c) =
             $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
          else
-            warn("Basis of the GroupRing is not defined.")
+            @warn("Basis of the GroupRing is not defined.")
          end
       end
       return new{T, A, GR}(c, RG)
@@ -236,7 +236,7 @@ function show(io::IO, X::GroupRingElem)
       end
       print(io, str)
    else
-      warn("Basis of the parent Group is not defined, showing coeffs")
+      @warn("Basis of the parent Group is not defined, showing coeffs")
       show(io, MIME("text/plain"), X.coeffs)
    end
 end
@@ -249,7 +249,7 @@ end
 
 function (==)(X::GroupRingElem, Y::GroupRingElem)
    if eltype(X.coeffs) != eltype(Y.coeffs)
-      warn("Comparing elements with different coeffs Rings!")
+      @warn("Comparing elements with different coeffs Rings!")
    end
    suppX = supp(X)
    suppX == supp(Y) || return false
@@ -289,7 +289,7 @@ end
 mul(a::T, X::GroupRingElem{T}) where {T<:Number} = GroupRingElem(a*X.coeffs, parent(X))
 
 function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S<:Number}
-   promote_type(T,S) == S || warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
+   promote_type(T,S) == S || @warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
    return GroupRingElem(a*X.coeffs, parent(X))
 end
 
@@ -318,14 +318,14 @@ function +(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T
 end
 
 function +(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
-   warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
+   @warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
    return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
 end
 
 -(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T = addeq!((-Y), X)
 
 function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
-   warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
+   @warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
    addeq!((-Y), X)
 end
 
@@ -442,7 +442,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T<
    end
 
    TT = typeof(first(X.coeffs)*first(Y.coeffs))
-   warn("Multiplying elements with different base rings! Promoting the result to $TT.")
+   @warn("Multiplying elements with different base rings! Promoting the result to $TT.")
 
    if isdefined(parent(X), :basis)
       result = parent(X)(similar(X.coeffs))
@@ -519,7 +519,7 @@ create_pm(b::Vector{T}) where {T<:GroupElem} = create_pm(b, reverse_dict(b))
 function check_pm(product_matrix, basis, twisted=false)
    idx = findfirst(product_matrix' .== 0)
    if idx != nothing
-      warn("Product is not supported on basis")
+      @warn("Product is not supported on basis")
       i,j = Tuple(idx)
       x = basis[i]
       if twisted
@@ -546,7 +546,7 @@ function complete!(RG::GroupRing)
          end
       end
    end
-   warning && warn("Some products were not supported on basis")
+   warning && @warn("Some products were not supported on basis")
    return RG
 end
 

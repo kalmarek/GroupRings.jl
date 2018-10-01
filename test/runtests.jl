@@ -134,10 +134,10 @@ using SparseArrays
          ww = "Scalar and coeffs are in different rings! Promoting result to Float64"
 
          @test isa(2.0*a, GroupRingElem)
-         @test_warn ww eltype(2.0*a) == typeof(2.0)
-         @test_warn ww (2.0*a).coeffs == 2.0.*(a.coeffs)
+         @test_logs (:warn, ww) eltype(2.0*a) == typeof(2.0)
+         @test_logs (:warn, ww) (2.0*a).coeffs == 2.0.*(a.coeffs)
 
-         @test_warn ww (a/2).coeffs == a.coeffs./2
+         @test_logs (:warn, ww) (a/2).coeffs == a.coeffs./2
          b = a/2
          @test isa(b, GroupRingElem)
          @test eltype(b) == typeof(1/2)
