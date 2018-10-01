@@ -15,10 +15,6 @@ matrix:
   allow_failures:
     - julia: nightly
 
-## uncomment the following lines to override the default test
-# script:
-  # - julia -e 'Pkg.clone(pwd()); Pkg.build("Groups"); Pkg.test("Groups"; coverage=true)'
-
 after_success:
   # push coverage results to Coveralls
    - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
