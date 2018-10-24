@@ -10,7 +10,7 @@ using LinearAlgebra
 import LinearAlgebra: norm
 using Markdown
 
-import Base: convert, show, hash, ==, +, -, *, //, /, length, getindex, setindex!, eltype, one, zero
+import Base: convert, show, hash, ==, +, -, *, ^, //, /, length, getindex, setindex!, eltype, one, zero
 
 ###############################################################################
 #
@@ -301,6 +301,8 @@ end
 
 (/)(X::GroupRingElem, a) = 1/a*X
 (//)(X::GroupRingElem, a::Union{Integer, Rational}) = 1//a*X
+
+(^)(X::GroupRingElem, n::Integer) = Base.power_by_squaring(X, n)
 
 ###############################################################################
 #
