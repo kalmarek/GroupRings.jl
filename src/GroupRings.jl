@@ -338,7 +338,42 @@ function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
 end
 
 doc"""
-    mul!(result::AbstractArray{T},
+    fmac!(result::AbstractVector{T},
+              X::AbstractVector,
+              Y::AbstractVector,
+             pm::Array{Int,2}) where {T<:Number}
+> Fused multiply-add for group ring coeffs using multiplication table `pm`.
+> The result of X*Y in GroupRing is added in-place to `result`. 
+> Notes:
+> * this method will silently produce false results if `X[k]` is non-zero for
+> `k > size(pm,1)`.
+> * This method will fail if any zeros (i.e. uninitialised entries) are present
+> in `pm`.
+> Use with extreme care!
+"""
+
+function fmac!(result::AbstractVector{T},
+                   X::AbstractVector,
+                   Y::AbstractVector,
+                  pm::Array{Int,2}) where {T<:Number}
+   z = zero(T)
+   s1 = size(pm,1)
+   s2 = size(pm,2)
+   
+   @inbounds for j in 1:s2
+      if Y[j] != z
+         for i in 1:s1
+            if X[i] != z
+               result[pm[i,j]] += X[i]*Y[j]
+            end
+         end
+      end
+   end
+   return result
+end
+
+doc"""
+    mul!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
              pm::Array{Int,2}) where {T<:Number}
@@ -357,20 +392,8 @@ function mul!(result::AbstractVector{T},
                   pm::Array{Int,2}) where {T<:Number}
    z = zero(T)
    result .= z
-   lY = length(Y)
-   s = size(pm,1)
 
-   @inbounds for j in 1:lY
-      if Y[j] != z
-         for i in 1:s
-            if X[i] != z
-               pm[i,j] == 0 && throw(ArgumentError("The product don't seem to be supported on basis!"))
-               result[pm[i,j]] += X[i]*Y[j]
-            end
-         end
-      end
-   end
-   return result
+   return fmac!(result, X, Y, pm)
 end
 
 doc"""
