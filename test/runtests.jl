@@ -289,11 +289,12 @@ using GroupRings
             
       @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
          8G^2 + 8H^2 + 4K^2 + 2L^2 ==
-            (2 - ∗(RG(g*h*k)) - RG(l))^2 +
-            2(2 - ∗(RG(g*h)) - RG(k))^2 +
-            4(2 - ∗(RG(g)) - RG(h))^2
+            (2 - ∗(RG(g*h*k)) - RG(l))^2 + 2(2 - ∗(RG(g*h)) - RG(k))^2 + 4(2 - ∗(RG(g)) - RG(h))^2
             
       @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
          2GH^2 + 2KL^2 == (2 - ∗(RG(g*h)) - RG(k*l))^2
+         
+      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 2(2G^2 + 2H^2) + 2(2K^2 + 2L^2) ==
+         (2 - ∗(RG(g*h)) - RG(k*l))^2 + 2(2 - ∗(RG(k)) - RG(l))^2 + 2(2 - ∗(RG(g)) - RG(h))^2
    end
 end
