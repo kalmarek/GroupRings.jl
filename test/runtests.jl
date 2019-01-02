@@ -153,7 +153,7 @@ using SparseArrays
          @test isa(b//4, GroupRingElem)
          @test eltype(b//4) == Rational{Int}
 
-         @test isa(b//big(4), GroupElem)
+         @test isa(b//big(4), RingElem)
          @test eltype(b//(big(4)//1)) == Rational{BigInt}
 
          @test isa(a//1, GroupRingElem)
