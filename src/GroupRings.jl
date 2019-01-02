@@ -341,7 +341,7 @@ function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
 end
 
 doc"""
-    fmac!(result::AbstractVector{T},
+    GRfmac!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
              pm::Array{Int,2}) where {T<:Number}
@@ -355,7 +355,7 @@ doc"""
 > Use with extreme care!
 """
 
-function fmac!(result::AbstractVector{T},
+function GRfmac!(result::AbstractVector{T},
                    X::AbstractVector,
                    Y::AbstractVector,
                   pm::Array{Int,2}) where {T<:Number}
@@ -376,7 +376,7 @@ function fmac!(result::AbstractVector{T},
 end
 
 doc"""
-    mul!(result::AbstractVector{T},
+    GRmul!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
              pm::Array{Int,2}) where {T<:Number}
@@ -389,14 +389,14 @@ doc"""
 > in `pm`.
 > Use with extreme care!
 """
-function mul!(result::AbstractVector{T},
+function GRmul!(result::AbstractVector{T},
                    X::AbstractVector,
                    Y::AbstractVector,
                   pm::Array{Int,2}) where {T<:Number}
    z = zero(T)
    result .= z
 
-   return fmac!(result, X, Y, pm)
+   return GRfmac!(result, X, Y, pm)
 end
 
 doc"""
@@ -464,7 +464,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where {T<
       result = parent(X)(similar(X.coeffs))
       result = mul!(result, X, Y)
    else
-      result = mul!(similar(X.coeffs), X.coeffs, Y.coeffs, parent(X).pm)
+      result = RGmul!(similar(X.coeffs), X.coeffs, Y.coeffs, parent(X).pm)
       result = GroupRingElem(result, parent(X))
    end
    return result
@@ -484,7 +484,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T<
       result = mul!(result, X, Y)
    else
       result = convert(TT, similar(X.coeffs))
-      result = mul!(result, X.coeffs, Y.coeffs, parent(X).pm)
+      result = RGmul!(result, X.coeffs, Y.coeffs, parent(X).pm)
       result = GroupRingElem(result, parent(X))
    end
    return result
