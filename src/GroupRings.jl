@@ -272,13 +272,11 @@ end
 
 function (==)(A::GroupRing, B::GroupRing)
    A.group == B.group || return false
-   if isdefined(A, :basis)
+   if isdefined(A, :pm) && isdefined(B, :pm)
       complete!(A)
-   end
-   if isdefined(B, :basis)
       complete!(B)
+      A.pm == B.pm || return false
    end
-   A.pm == B.pm || return false
    return true
 end
 
