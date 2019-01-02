@@ -208,8 +208,36 @@ using SparseArrays
          @test supp(z) == parent(z).basis
          @test supp(RG(1) + RG(perm"(2,3)")) == [G(), perm"(2,3)"]
          @test supp(a) == [perm"(3)", perm"(2,3)", perm"(1,2,3)"]
+         
       end
-
+      
+      @testset "HPC multiplicative operations" begin
+      
+         G = PermutationGroup(5)
+         RG = GroupRing(G, fastm=true)
+         RG2 = GroupRing(G, fastm=false)
+         
+         Z = RG()
+         W = RG()
+         
+         for g in [rand(G) for _ in 1:30]
+            X = RG(g)
+            Y = -RG(inv(g))
+            for i in 1:10
+               X[rand(G)] += rand(1:3)
+               Y[rand(G)] -= rand(1:3)
+            end
+            
+            @test X*Y == 
+                  RG2(X)*RG2(Y) == 
+                  GroupRings.mul!(Z, X, Y)
+            
+            @test Z.coeffs == GroupRings.GRmul!(W.coeffs, X.coeffs, Y.coeffs, RG.pm) == W.coeffs
+            @test (2*X*Y).coeffs == 
+               GroupRings.GRfmac!(W.coeffs, X.coeffs, Y.coeffs, RG.pm) ==
+               GroupRings.mul!(2, X*Y).coeffs
+         end
+      end
    end
    
    @testset "SumOfSquares in group rings" begin
