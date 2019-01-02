@@ -224,15 +224,24 @@ end
 
 function show(io::IO, X::GroupRingElem)
    RG = parent(X)
+   T = eltype(X.coeffs)
    if X.coeffs == zero(X.coeffs)
-      T = eltype(X.coeffs)
       print(io, "$(zero(T))*$((RG.group)())")
    elseif isdefined(RG, :basis)
       non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findall(!iszero, X.coeffs))
-      elts = ("$(sign(c)> 0 ? " + " : " - ")$(abs(c))*$g" for (c,g) in non_zeros)
-      str = join(elts, "")[2:end]
+      elts = String[]
+      for (c,g) in non_zeros
+      	  sgn = (sign(c)>=0 ? " + " : " - ")
+	  if c == T(1)
+	      coeff = ""
+	  else
+	      coeff = "$(abs(c))"
+	  end
+	  push!(elts, sgn*coeff*"$(g)")
+      end
+      str = join(elts, "")
       if sign(first(non_zeros)[1]) > 0
-         str = str[3:end]
+         str = str[4:end]
       end
       print(io, str)
    else
