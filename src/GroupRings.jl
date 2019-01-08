@@ -424,9 +424,9 @@ function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    if isdefined(RG, :pm)
       s = size(RG.pm)
       k = findprev(!iszero, X.coeffs, lX)
-      (k == nothing ? 0 : k) <= s[1] || throw("Element in X outside of support of RG.pm")
+      (k == nothing ? 0 : k) <= s[1] || throw("Element in X outside of support of parents product")
       k = findprev(!iszero, Y.coeffs, lY)
-      (k == nothing ? 0 : k) <= s[2] || throw("Element in Y outside of support of RG.pm")
+      (k == nothing ? 0 : k) <= s[2] || throw("Element in Y outside of support of parents product")
 
       for j in 1:lY
          if Y.coeffs[j] != z
