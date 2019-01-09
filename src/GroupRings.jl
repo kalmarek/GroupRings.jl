@@ -5,9 +5,7 @@ using AbstractAlgebra
 import AbstractAlgebra: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, addeq!, mul!
 
 using SparseArrays
-import SparseArrays: sparse
 using LinearAlgebra
-import LinearAlgebra: norm
 using Markdown
 
 import Base: convert, show, hash, ==, +, -, *, ^, //, /, length, getindex, setindex!, eltype, one, zero
@@ -202,13 +200,15 @@ end
 Base.size(X::GroupRingElem) = size(X.coeffs)
 Base.IndexStyle(::Type{GroupRingElem}) = Base.LinearFast()
 
+dense(X::GroupRingElem{T, A}) where {T, A<:DenseVector} = X
+
 function dense(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector}
    return parent(X)(Vector(X.coeffs))
 end
-dense(X::GroupRingElem{T, A}) where {T, A<:Vector} = X
 
-sparse(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector} = X
-function sparse(X::GroupRingElem{T, A}) where {T, A<:Vector}
+SparseArrays.sparse(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector} = X
+
+function SparseArrays.sparse(X::GroupRingElem{T, A}) where {T, A<:Vector}
    return parent(X)(sparse(X.coeffs))
 end
 
@@ -515,7 +515,7 @@ end
 
 length(X::GroupRingElem) = count(!iszero, X.coeffs)
 
-norm(X::GroupRingElem, p=2) = norm(X.coeffs, p)
+LinearAlgebra.norm(X::GroupRingElem, p::Int=2) = norm(X.coeffs, p)
 
 aug(X::GroupRingElem) = sum(X.coeffs)
 
