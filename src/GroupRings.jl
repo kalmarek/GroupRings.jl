@@ -340,7 +340,7 @@ function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
 end
 
 @doc doc"""
-    GRfmac!(result::AbstractVector{T},
+    fmac!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
              pm::Array{Int,2}) where {T<:Number}
@@ -354,7 +354,7 @@ end
 > Use with extreme care!
 """
 
-function GRfmac!(result::AbstractVector{T},
+function fmac!(result::AbstractVector{T},
                    X::AbstractVector,
                    Y::AbstractVector,
                   pm::Array{Int,2}) where {T<:Number}
@@ -395,7 +395,7 @@ function GRmul!(result::AbstractVector{T},
    z = zero(T)
    result .= z
 
-   return GRfmac!(result, X, Y, pm)
+   return fmac!(result, X, Y, pm)
 end
 
 @doc doc"""
@@ -463,7 +463,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where {T<
       result = parent(X)(similar(X.coeffs))
       result = mul!(result, X, Y)
    else
-      result = RGmul!(similar(X.coeffs), X.coeffs, Y.coeffs, parent(X).pm)
+      result = GRmul!(similar(X.coeffs), X.coeffs, Y.coeffs, parent(X).pm)
       result = GroupRingElem(result, parent(X))
    end
    return result

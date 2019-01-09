@@ -234,7 +234,7 @@ using SparseArrays
             
             @test Z.coeffs == GroupRings.GRmul!(W.coeffs, X.coeffs, Y.coeffs, RG.pm) == W.coeffs
             @test (2*X*Y).coeffs == 
-               GroupRings.GRfmac!(W.coeffs, X.coeffs, Y.coeffs, RG.pm) ==
+               GroupRings.fmac!(W.coeffs, X.coeffs, Y.coeffs, RG.pm) ==
                GroupRings.mul!(2, X*Y).coeffs
          end
       end
