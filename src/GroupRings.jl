@@ -338,7 +338,7 @@ function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
    addeq!((-Y), X)
 end
 
-doc"""
+@doc doc"""
     GRfmac!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
@@ -373,7 +373,7 @@ function GRfmac!(result::AbstractVector{T},
    return result
 end
 
-doc"""
+@doc doc"""
     GRmul!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
@@ -397,7 +397,7 @@ function GRmul!(result::AbstractVector{T},
    return GRfmac!(result, X, Y, pm)
 end
 
-doc"""
+@doc doc"""
     mul!{T}(result::GroupRingElem{T},
                  X::GroupRingElem,
                  Y::GroupRingElem)
