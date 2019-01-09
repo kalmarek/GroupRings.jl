@@ -22,9 +22,10 @@ mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    basis_dict::Dict{T, Int}
    pm::Array{Int,2}
 
-   function GroupRing(G::Gr, basis::Vector{T}; fastm::Bool=false) where {Gr, T}
+   function GroupRing(G::Gr, basis::Vector{T};
+         cachedmul::Bool=false) where {Gr, T}
       RG = new{Gr, T}(G, basis, reverse_dict(basis))
-      fastm && fastm!(RG)
+      cachedmul && initializepm!(RG)
       return RG
    end
 
@@ -69,8 +70,8 @@ function GroupRingElem(c::AbstractVector, RG::GroupRing)
    return GroupRingElem{eltype(c), typeof(c), typeof(RG)}(c, RG)
 end
 
-function GroupRing(G::Generic.PermGroup; fastm::Bool=false)
-   return GroupRing(G, vec(collect(G)), fastm=fastm)
+function GroupRing(G::Generic.PermGroup; cachedmul::Bool=false)
+   return GroupRing(G, vec(collect(G)), cachedmul=cachedmul)
 end
 
 function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
@@ -272,9 +273,9 @@ end
 
 function (==)(A::GroupRing, B::GroupRing)
    A.group == B.group || return false
-   if isdefined(A, :pm) && isdefined(B, :pm)
-      complete!(A)
-      complete!(B)
+   if isdefined(A, :basis) && isdefined(B, :basis)
+      A.basis == B.basis || return false
+   elseif isdefined(A, :pm) && isdefined(B, :pm)
       A.pm == B.pm || return false
    end
    return true
@@ -564,7 +565,10 @@ end
 
 function complete!(RG::GroupRing)
    isdefined(RG, :basis) || throw(ArgumentError("Provide basis for completion first!"))
-   fastm!(RG, fill=false)
+   if !isdefined(RG, :pm) 
+      initializepm!(RG, fill=false)
+      return RG
+   end
 
    warning = false
    for idx in findall(RG.pm .== 0)
@@ -582,7 +586,7 @@ function complete!(RG::GroupRing)
    return RG
 end
 
-function fastm!(RG::GroupRing; fill::Bool=false)
+function initializepm!(RG::GroupRing; fill::Bool=false)
    isdefined(RG, :basis) || throw("For baseless Group Rings You need to provide pm.")
    isdefined(RG, :pm) && return RG
    if fill

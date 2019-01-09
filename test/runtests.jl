@@ -20,13 +20,13 @@ using SparseArrays
 
       @test isa(GroupRing(PermutationGroup(6), rand(1:6, 6,6)), GroupRing)
 
-      RG = GroupRing(G, fastm=true)
+      RG = GroupRing(G, cachedmul=true)
       @test isdefined(RG, :pm) == true
       @test RG.pm == zeros(Int, (6,6))
 
       @test isa(complete!(RG), GroupRing)
       @test all(RG.pm .> 0)
-      @test RG.pm == GroupRings.fastm!(GroupRing(G, fastm=false), fill=true).pm
+      @test RG.pm == GroupRings.initializepm!(GroupRing(G, cachedmul=false), fill=true).pm
 
       @test RG.basis_dict == GroupRings.reverse_dict(collect(G))
 
@@ -80,7 +80,7 @@ using SparseArrays
 
    @testset "GroupRingElems constructors/basic manipulation" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G, fastm=true)
+      RG = GroupRing(G, cachedmul=true)
       a = rand(6)
       @test isa(GroupRingElem(a, RG), GroupRingElem)
       @test isa(RG(a), GroupRingElem)
@@ -119,7 +119,7 @@ using SparseArrays
 
    @testset "Arithmetic" begin
       G = PermutationGroup(3)
-      RG = GroupRing(G, fastm=true)
+      RG = GroupRing(G, cachedmul=true)
       a = RG(ones(Int, order(G)))
 
       @testset "scalar operators" begin
@@ -214,8 +214,8 @@ using SparseArrays
       @testset "HPC multiplicative operations" begin
       
          G = PermutationGroup(5)
-         RG = GroupRing(G, fastm=true)
-         RG2 = GroupRing(G, fastm=false)
+         RG = GroupRing(G, cachedmul=true)
+         RG2 = GroupRing(G, cachedmul=false)
          
          Z = RG()
          W = RG()
