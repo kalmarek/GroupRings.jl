@@ -297,12 +297,13 @@ end
 mul(a::T, X::GroupRingElem{T}) where {T<:Number} = GroupRingElem(a*X.coeffs, parent(X))
 
 function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S<:Number}
-   promote_type(T,S) == S || @warn("Scalar and coeffs are in different rings! Promoting result to $(promote_type(T,S))")
-   return GroupRingElem(a*X.coeffs, parent(X))
+   TT = promote_type(T,S) 
+   TT == S || @warn("Scalar and coeffs are in different rings! Promoting result to $(TT)")
+   return GroupRingElem(a.*X.coeffs, parent(X))
 end
 
-(*)(a, X::GroupRingElem) = mul(a,X)
-(*)(X::GroupRingElem, a) = mul(a,X)
+(*)(a::Number, X::GroupRingElem) = mul(a,X)
+(*)(X::GroupRingElem, a::Number) = mul(a,X)
 
 # disallow Rings to hijack *(::, ::GroupRingElem)
 *(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = mul(a,X)
