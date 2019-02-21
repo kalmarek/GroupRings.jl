@@ -113,7 +113,7 @@ end
 
 zero(RG::GroupRing, T::Type=Int) = RG(T)
 one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
-one(RG::GroupRing{R}, T::Type=Int) where {R<:Ring} = RG(one(RG.group()), T)
+one(RG::GroupRing{<:MatSpace}, T::Type=Int) = RG(one(RG.group), T)
 
 function (RG::GroupRing)(T::Type=Int)
    isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
@@ -126,9 +126,9 @@ function (RG::GroupRing)(i::Int, T::Type=Int)
    return elt
 end
 
-function (RG::GroupRing{R})(i::Int, T::Type=Int) where {R<:Ring}
+function (RG::GroupRing{<:MatSpace})(i::Int, T::Type=Int)
    elt = RG(T)
-   elt[one(RG.group())] = i
+   elt[one(RG.group)] = i
    return elt
 end
 
