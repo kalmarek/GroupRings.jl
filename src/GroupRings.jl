@@ -302,11 +302,11 @@ function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S<:Number}
    return GroupRingElem(a.*X.coeffs, parent(X))
 end
 
-(*)(a::Number, X::GroupRingElem) = mul(a,X)
-(*)(X::GroupRingElem, a::Number) = mul(a,X)
+(*)(a::Number, X::GroupRingElem) = mul(a, X)
+(*)(X::GroupRingElem, a::Number) = mul(a, X)
 
 # disallow Rings to hijack *(::, ::GroupRingElem)
-*(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = mul(a,X)
+*(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = mul(a, X)
 
 (/)(X::GroupRingElem, a) = 1/a*X
 (//)(X::GroupRingElem, a::Union{Integer, Rational}) = 1//a*X
@@ -376,10 +376,8 @@ function fmac!(result::AbstractVector{T},
 end
 
 @doc doc"""
-    GRmul!(result::AbstractVector{T},
-              X::AbstractVector,
-              Y::AbstractVector,
-             pm::Array{Int,2}) where {T<:Number}
+    GRmul!(result::AbstractVector{T}, X::AbstractVector, Y::AbstractVector,
+           pm::Matrix{<:Integer}) where {T<:Number}
 > The most specialised multiplication for `X` and `Y` (intended for `coeffs` of
 > `GroupRingElems`), using multiplication table `pm`.
 > Notes:
@@ -392,7 +390,7 @@ end
 function GRmul!(result::AbstractVector{T},
                    X::AbstractVector,
                    Y::AbstractVector,
-                  pm::Array{Int,2}) where {T<:Number}
+                  pm::AbstractMatrix{<:Integer}) where {T<:Number}
    z = zero(T)
    result .= z
 
@@ -400,9 +398,7 @@ function GRmul!(result::AbstractVector{T},
 end
 
 @doc doc"""
-    mul!{T}(result::GroupRingElem{T},
-                 X::GroupRingElem,
-                 Y::GroupRingElem)
+    mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
 > In-place multiplication for `GroupRingElem`s `X` and `Y`.
 > `mul!` will make use the initialised entries of `pm` attribute of
 > `parent(X)::GroupRing` (if available), and will compute and store in `pm` the
