@@ -53,3 +53,26 @@ Base.@propagate_inbounds function Base.setindex!(X::GroupRingElem, val,  g::Grou
     return X.coeffs[RG[g]] = val
 end
 
+###############################################################################
+#
+#   GroupRing specifics: augmentation, support, *-involution
+#
+###############################################################################
+
+aug(X::GroupRingElem) = sum(X.coeffs)
+
+function supp(X::GroupRingElem)
+    @assert hasbasis(parent(X))
+    dropzeros!(X.coeffs)
+    return parent(X).basis[X.coeffs.nzind]
+end
+
+function star(X::GroupRingElem{T}) where T
+    RG = parent(X)
+    hasbasis(RG) || throw(ArgumentError("*-involution without basis is not possible"))
+    nzind = [RG.basis_dict[inv(RG.basis[i])] for i in X.coeffs.nzind]
+    return GroupRingElem(sparsevec(nzind, X.coeffs.nzval, X.coeffs.n), RG)
+end
+
+LinearAlgebra.norm(X::GroupRingElem, p::Int=2) = norm(X.coeffs, p)
+

@@ -81,37 +81,6 @@ function (==)(A::GroupRing, B::GroupRing)
 end
 
 
-###############################################################################
-#
-#   *-involution
-#
-###############################################################################
-
-function star(X::GroupRingElem{T}) where T
-   RG = parent(X)
-   isdefined(RG, :basis) || throw("*-involution without basis is not possible")
-   result = RG(T)
-   for (i,c) in enumerate(X.coeffs)
-      if c != zero(T)
-         g = inv(RG.basis[i])
-         result[g] = c
-      end
-   end
-   return result
-end
-
-###############################################################################
-#
-#   Misc
-#
-###############################################################################
-
-LinearAlgebra.norm(X::GroupRingElem, p::Int=2) = norm(X.coeffs, p)
-
-aug(X::GroupRingElem) = sum(X.coeffs)
-
-supp(X::GroupRingElem) = parent(X).basis[findall(!iszero, X.coeffs)]
-
 function reverse_dict(::Type{I}, iter) where I<:Integer
    length(iter) > typemax(I) && error("Can not produce reverse dict: $(length(iter)) is too large for $T")
    return Dict{eltype(iter), I}(x => i for (i,x) in enumerate(iter))
