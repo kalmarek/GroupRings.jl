@@ -5,6 +5,7 @@ using GroupRings
 using SparseArrays
 
 
+include("unittests.jl")
 include("usetests.jl")
 
 
