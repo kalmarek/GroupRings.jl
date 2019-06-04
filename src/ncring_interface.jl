@@ -123,6 +123,22 @@ end
 
 ###############################################################################
 #
+#   Exact Division (TODO)
+#
+###############################################################################
+
+function AbstractAlgebra.divexact_left(X::GroupRingElem, Y::GroupRingElem)
+   isunit(Y) || throw(DivideError())
+   return inv(Y)*X
+end
+
+function AbstractAlgebra.divexact_right(X::GroupRingElem, Y::GroupRingElem)
+   isunit(Y) || throw(DivideError())
+   return X*inv(Y)
+end
+
+###############################################################################
+#
 #   promotion, rand, isapprox
 #
 ###############################################################################
