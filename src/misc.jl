@@ -81,6 +81,11 @@ end
 #
 ###############################################################################
 
+function SparseArrays.dropzeros!(X::GroupRingElem; trim::Bool=true)
+    dropzeros!(X.coeffs, trim=trim)
+    return X
+end
+
 LinearAlgebra.norm(X::GroupRingElem, p::Int=2) = norm(X.coeffs, p)
 
 function _dealias(res::GroupRingElem, x::GroupRingElem, y::GroupRingElem)
