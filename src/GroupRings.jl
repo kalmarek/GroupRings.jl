@@ -1,18 +1,19 @@
-__precompile__()
 module GroupRings
-
-using AbstractAlgebra
-import AbstractAlgebra: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, addeq!, mul!
 
 using SparseArrays
 using LinearAlgebra
 using Markdown
+using AbstractAlgebra
 
-import Base: convert, show, hash, ==, +, -, *, ^, //, /, length, getindex, setindex!, eltype, one, zero
+import Base: ==, +, -, *, ^, //, /
+import AbstractAlgebra: Group, GroupElem, NCRing, NCRingElem, Ring
+import AbstractAlgebra: zero!, mul!, add!, addeq!, addmul!
 
-export GroupRing, GroupRingElem, complete!, create_pm, star, aug, supp
+export GroupRing, GroupRingElem, aug, supp, star
 
-
-
+include("types.jl")
+include("ncring_interface.jl")
+include("arithmetic.jl")
+include("misc.jl")
 
 end # of module GroupRings
