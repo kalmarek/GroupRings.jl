@@ -159,3 +159,99 @@ function AbstractAlgebra.change_base_ring(X::GroupRingElem, R::Ring)
     end
 end
 
+###############################################################################
+#
+#   Cache Manipulation
+#
+###############################################################################
+
+hasbasis(RG::GroupRing) = isdefined(RG, :basis)
+cachesmultiplication(RG::GroupRing) = isdefined(RG, :pm)
+
+reverse_dict(iter) = reverse_dict(Int32, iter)
+
+function reverse_dict(::Type{I}, iter) where I<:Integer
+    length(iter) > typemax(I) && error("Can not produce reverse dict: $(length(iter)) is too large for $I")
+    return Dict{eltype(iter), I}(x => i for (i,x) in enumerate(iter))
+end
+
+setcache!(RG::GroupRing, pm::Matrix{<:Integer}) = (RG.pm = pm; return RG)
+
+function complete!(RG::GroupRing,
+    indX=1:size(RG.pm, 1),
+    indY=1:size(RG.pm, 2);
+    twisted::Bool=false)
+
+    @assert hasbasis(RG)
+
+    # preallocate elements:
+    res = RG.group()
+    x = RG.group()
+    i_old = 0
+
+    for (i,j) in Iterators.ProductIterator((indX, indY))
+        if iszero(RG.pm[i,j])
+            if i == i_old
+                x = ifelse(twisted, inv(RG[i]), RG[i])
+                i_old = i
+            end
+            RG.pm[i,j] = RG[AbstractAlgebra.mul!(res, x, RG[j])]
+        end
+    end
+
+    return RG
+end
+
+function complete!(RG::GroupRing, limit::Integer; twisted::Bool=false, check::Bool=true)
+    hasbasis(RG) || throw(ArgumentError("Provide basis for completion first!"))
+
+    if !cachesmultiplication(RG)
+        setcache!(RG, create_pm(RG.basis, RG.basis_dict, limit, twisted=twisted, check=false))
+        # we check correctness below
+    else
+        complete!(RG, 1:limit, 1:limit; twisted=twisted)
+    end
+
+    check && @assert check_pm(RG.pm, RG.basis; twisted=twisted)
+
+    return RG
+end
+
+function create_pm(basis::AbstractVector{T}, basis_dict::Dict{T, <:Integer},
+    limit::Integer=length(basis); twisted::Bool=false, check::Bool=true) where T
+
+    product_matrix = zeros(Int32, limit, limit)
+
+    Threads.@threads for i in 1:size(product_matrix, 1)
+        x = ifelse(twisted, inv(basis[i]), basis[i])
+        for j in 1:size(product_matrix, 2)
+            product_matrix[i,j] = basis_dict[x*basis[j]]
+        end
+    end
+
+    # exceptions in threaded code are not critical so we need to
+    check && @assert check_pm(product_matrix, basis, twisted=twisted)
+
+    return product_matrix
+end
+
+function check_pm(pm::Matrix{<:Integer}, basis::Vector; twisted::Bool=false)
+
+    idx = (0,0)
+    for i in 1:size(pm, 1), j in 1:size(pm,2)
+        # @info "" i j
+        if iszero(pm[i,j])
+            idx = (i,j)
+            break
+        end
+    end
+
+    if idx == (0,0)
+        return true
+    else
+        i,j = Tuple(idx)
+        x = ifelse(twisted, inv(basis[i]), basis[i])
+        @error "Product x*y is not supported on basis:" x y=basis[j]
+        throw(KeyError(x*basis[j]))
+    end
+end
