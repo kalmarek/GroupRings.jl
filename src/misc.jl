@@ -74,5 +74,51 @@ function star(X::GroupRingElem{T}) where T
     return GroupRingElem(sparsevec(nzind, X.coeffs.nzval, X.coeffs.n), RG)
 end
 
+
+###############################################################################
+#
+#   Utilities
+#
+###############################################################################
+
 LinearAlgebra.norm(X::GroupRingElem, p::Int=2) = norm(X.coeffs, p)
 
+function _dealias(res::GroupRingElem, x::GroupRingElem, y::GroupRingElem)
+    @assert size(res) == size(x) == size(y)
+    if res.coeffs === x.coeffs || res.coeffs === y.coeffs
+        res = similar(res)
+    end
+    return res
+end
+
+function _promote(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S,T}
+    # TT = Core.Compiler.returntype(+, (T, S))
+    TT = AbstractAlgebra.promote_type(S,T)
+    # we do if else on TT to decide the parent of the result
+    if TT == S
+        result = similar(X)
+    elseif TT == T
+        result = similar(Y)
+    else
+        # we try to come up with parent; this will work for Julia numeric types
+        R = parent(first(X)+first(Y))
+        RG = change_base_ring(parent(X), R)
+        result = GroupRingElem(similar(X.coeffs, TT), RG)
+        @warn "Promoting group ring elements with different base rings!\nThe result has coefficients in $(R) of type $(eltype(result))."
+    end
+    return result
+end
+
+multiplicative_id(G::Group) = G()
+multiplicative_id(R::NCRing) = one(R)
+
+function _identity_idx(RG::GroupRing)
+    hasbasis(RG) && return RG[multiplicative_id(RG.group)]
+    @warn "Group ring has no basis attached. Assuming identity is at index 1"
+    return 1
+end
+
+function _coerce_scalar(RG::GroupRing, c)
+    val = base_ring(RG)(c)
+    return GroupRingElem(sparsevec([_identity_idx(RG)], [val], length(RG)), RG, check=false)
+end
