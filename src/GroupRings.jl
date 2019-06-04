@@ -14,51 +14,6 @@ export GroupRing, GroupRingElem, complete!, create_pm, star, aug, supp
 
 ###############################################################################
 #
-#   Basic manipulation && Array protocol
-#
-###############################################################################
-
-function hash(X::GroupRingElem, h::UInt)
-   return hash(X.coeffs, hash(parent(X), hash(GroupRingElem, h)))
-end
-
-function getindex(X::GroupRingElem, n::Int)
-   return X.coeffs[n]
-end
-
-function getindex(X::GroupRingElem, g::GroupElem)
-   return X.coeffs[parent(X).basis_dict[g]]
-end
-
-function setindex!(X::GroupRingElem, value, n::Int)
-   X.coeffs[n] = value
-end
-
-function setindex!(X::GroupRingElem, value, g::GroupElem)
-   RG = parent(X)
-   if !(g in keys(RG.basis_dict))
-      g = (RG.group)(g)
-   end
-   X.coeffs[RG.basis_dict[g]] = value
-end
-
-Base.size(X::GroupRingElem) = size(X.coeffs)
-Base.IndexStyle(::Type{GroupRingElem}) = Base.LinearFast()
-
-dense(X::GroupRingElem{T, A}) where {T, A<:DenseVector} = X
-
-function dense(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector}
-   return parent(X)(Vector(X.coeffs))
-end
-
-SparseArrays.sparse(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector} = X
-
-function SparseArrays.sparse(X::GroupRingElem{T, A}) where {T, A<:Vector}
-   return parent(X)(sparse(X.coeffs))
-end
-
-###############################################################################
-#
 #   String I/O
 #
 ###############################################################################
@@ -150,8 +105,6 @@ end
 #   Misc
 #
 ###############################################################################
-
-length(X::GroupRingElem) = count(!iszero, X.coeffs)
 
 LinearAlgebra.norm(X::GroupRingElem, p::Int=2) = norm(X.coeffs, p)
 
