@@ -121,3 +121,49 @@ function ==(A::GroupRing, B::GroupRing)
    end
 end
 
+###############################################################################
+#
+#   promotion, rand, isapprox
+#
+###############################################################################
+
+Base.promote_rule(::Type{<:GroupRingElem{T}},::Type{T}) where T = GroupRingElem{T}
+
+function Base.promote_rule(::Type{<:GroupRingElem{T}}, ::Type{U}) where {T, U<:RingElement}
+   return (promote_rule(T, U) == T ? GroupRingElem{T} : Union{})
+end
+
+function Base.rand(RG::GroupRing, density=0.05, args...)
+	l = length(RG)
+
+	if cachesmultiplication(RG)
+		nzind = rand(1:size(RG.pm, 1), floor(Int, density*l))
+	else
+		nzind = rand(1:l, floor(Int, density*l))
+	end
+
+   nzval = [rand(base_ring(RG), args...) for _ in nzind]
+
+	return GroupRingElem(sparsevec(nzind, nzval, l), RG)
+end
+
+function Base.isapprox(X::GroupRingElem{T}, Y::GroupRingElem{S};
+	atol::Real=sqrt(eps())) where {T,S}
+   parent(X) == parent(Y) || return false
+   return isapprox(X.coeffs, Y.coeffs, atol=atol)
+end
+
+Base.isapprox(X::GroupRingElem{T}, a::T; atol::Real=sqrt(eps())) where T = isapprox(X, RG(a))
+
+Base.isapprox(a::T, X::GroupRingElem{T}; atol::Real=sqrt(eps())) where T = isapprox(X,a)
+
+###############################################################################
+#
+#   Additional functionality
+#
+###############################################################################
+
+function AbstractAlgebra.isunit(X::GroupRingElem)
+   count(!iszero, X.coeffs) == 1 || return false
+   return isunit(X[supp(X)[1]])
+end
