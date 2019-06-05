@@ -224,7 +224,7 @@ end
         for g in G
             @test star(RG(g)) == RG(inv(g))
             @test (RG(1) - g) * star(RG(1) - g) == RG(2) - g - inv(g)
-            @test aug(RG(1) - g) == 0
+            @test aug((RG(1) - g)*(RG(1) - inv(g))) == 0
         end
 
         a = RG(1) + perm"(2,3)" + perm"(1,2,3)"
