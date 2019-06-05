@@ -189,10 +189,10 @@ function complete!(RG::GroupRing,
     x = RG.group()
     i_old = 0
 
-    for (i,j) in Iterators.ProductIterator((indX, indY))
+    for (j,i) in Iterators.ProductIterator((indY, indX))
         if iszero(RG.pm[i,j])
-            if i == i_old
-                x = ifelse(twisted, inv(RG[i]), RG[i])
+            if i != i_old
+                x = (twisted ? inv(RG[i]) : RG[i])
                 i_old = i
             end
             RG.pm[i,j] = RG[AbstractAlgebra.mul!(res, x, RG[j])]
@@ -223,9 +223,11 @@ function create_pm(basis::AbstractVector{T}, basis_dict::Dict{T, <:Integer},
     product_matrix = zeros(Int32, limit, limit)
 
     Threads.@threads for i in 1:size(product_matrix, 1)
-        x = ifelse(twisted, inv(basis[i]), basis[i])
+        x = (twisted ? inv(basis[i]) : basis[i])
+        res = parent(x)()
         for j in 1:size(product_matrix, 2)
-            product_matrix[i,j] = basis_dict[x*basis[j]]
+            res = AbstractAlgebra.mul!(res, x, basis[j])
+            product_matrix[i,j] = basis_dict[res]
         end
     end
 
