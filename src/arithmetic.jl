@@ -27,8 +27,6 @@ function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
     result = zero!(_dealias(result, X, Y))
     X_nzeros_idx = findall(!iszero, X.coeffs)
     Y_nzeros_idx = findall(!iszero, Y.coeffs)
-    # X_nzeros_idx = [i for i in eachindex(X.coeffs) if X[i] != zero(eltype(X))]
-    # Y_nzeros_idx = [i for i in eachindex(Y.coeffs) if Y[i] != zero(eltype(Y))]
 
     RG = parent(X)
 
