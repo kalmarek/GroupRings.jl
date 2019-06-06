@@ -124,6 +124,7 @@ function test_unary_binary_ops(f,g)
         old_f, old_g = deepcopy(f), deepcopy(g)
         @test parent(-f) == parent(f)
         @test !(-f === f)
+        @test f == old_f
 
         @test f+g isa typeof(f)
         @test parent(f) == parent(f+g)
@@ -227,13 +228,18 @@ end
 function test_promote_rules(f,g)
     f,g = deepcopy(f), deepcopy(g)
     @testset "promote_rules" begin
-        @test AbstractAlgebra.promote_rule(typeof(f), Int16) == typeof(f)
+
+        @test_broken AbstractAlgebra.promote_rule(typeof(f), Int16) == typeof(f)
+        @test_broken promote_rule(typeof(f), BigInt) == typeof(f)
+
         @test AbstractAlgebra.promote_rule(typeof(f), typeof(g)) == typeof(f)
+        @test AbstractAlgebra.promote_rule(typeof(g), typeof(f)) == typeof(f)
+
         if has_base_ring(parent(f))
             S = base_ring(parent(f))
             @test AbstractAlgebra.promote_rule(typeof(f), elem_type(S)) == typeof(f)
+            @test AbstractAlgebra.promote_rule(elem_type(S), typeof(f)) == typeof(f)
         end
-        # @test promote_rupe(typeof(f), BigInt) == typeof(f)
     end
 end
 

@@ -143,10 +143,22 @@ end
 #
 ###############################################################################
 
-Base.promote_rule(::Type{<:GroupRingElem{T}},::Type{T}) where T = GroupRingElem{T}
+AbstractAlgebra.promote_rule(::Type{GREl}, ::Type{T}) where {T<:RingElement, GREl<:GroupRingElem{T}} = GREl
 
-function Base.promote_rule(::Type{<:GroupRingElem{T}}, ::Type{U}) where {T, U<:RingElement}
-   return (promote_rule(T, U) == T ? GroupRingElem{T} : Union{})
+function AbstractAlgebra.promote_rule(
+    ::Type{<:GroupRingElem{T, GR}},
+    ::Type{<:GroupRingElem{S, GR}}) where {T<:RingElement, S<:RingElement, GR}
+    R = AbstractAlgebra.promote_rule(T, S)
+    return (R == Union{} ? Union{} : GroupRingElem{R, GR})
+end
+
+function AbstractAlgebra.promote_rule(::Type{<:GroupRingElem{T, GR}}, ::Type{S}) where {T, GR, S<:RingElement}
+    R = AbstractAlgebra.promote_rule(T, S)
+    return (R == Union{} ? Union{} : GroupRingElem{R, GR})
+end
+
+function AbstractAlgebra.promote_rule(u::Type{U}, x::Type{GREl}) where {T, GREl<:GroupRingElem{T}, U<:RingElement}
+    return AbstractAlgebra.promote_rule(x, u)
 end
 
 function Base.rand(RG::GroupRing, density=0.05, args...)
