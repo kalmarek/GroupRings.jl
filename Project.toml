@@ -1,7 +1,7 @@
 name = "GroupRings"
 uuid = "0befed6a-bd73-11e8-1e41-a1190947c2f5"
 authors = ["Marek Kaluba <kalmar@amu.edu.pl>"]
-version = "0.2.0"
+version = "0.3.0"
 
 [deps]
 AbstractAlgebra = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
@@ -9,11 +9,12 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
+[compat]
+Groups = "^0.2.1"
+
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Groups = "5d8bd718-bd84-11e8-3b40-ad14f4a32557"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "Groups"]
-
-[compat]
