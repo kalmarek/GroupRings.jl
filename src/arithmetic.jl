@@ -155,7 +155,7 @@ function addeq!(X::GroupRingElem{T}, a::T) where T
     return X
 end
 
-function addeq!(X::GroupRingElem{T, GroupRing{R,G,El}}, g::El, v=1) where {T,R,G,El}
+function addeq!(X::GroupRingElem{T, GroupRing{R,G,El}}, g::El, v=one(T)) where {T,R,G,El}
     @assert hasbasis(parent(X))
     X[g] += T(v)
     return X
@@ -177,14 +177,14 @@ end
 
 ### Scalar multiplication/scalar division
 
-scalarmul!(a::T, X::GroupRingElem{T}) where T<:RingElement = (X.coeffs .*= a; return X)
+scalarmul!(a::T, X::GroupRingElem{T}) where T = (X.coeffs .*= a; return X)
 
 function scalarmul(a::S, X::GroupRingElem{T}) where {S,T}
     if promote_type(S, T) == T
         return scalarmul!(base_ring(parent(X))(a), deepcopy(X))
     else
         RG = change_base_ring(parent(X), parent(a))
-        @warn "Coefficient ring does not contain scalar $a.\nThe result has coefficients in $(parent(a)) of type $(elem_type(parent(a)))."
+        @warn "Coefficient ring does not contain scalar $a;\nThe resulting GroupRingElem has coefficients in $(parent(a)) of type $(elem_type(parent(a)))."
         return scalarmul!(a, GroupRingElem(base_ring(RG).(X.coeffs), RG))
     end
 end

@@ -195,7 +195,7 @@ function complete!(RG::GroupRing,
                 x = (twisted ? inv(RG[i]) : RG[i])
                 i_old = i
             end
-            RG.pm[i,j] = RG[AbstractAlgebra.mul!(res, x, RG[j])]
+            RG.pm[i,j] = RG[mul!(res, x, RG[j])]
         end
     end
 
@@ -226,7 +226,7 @@ function create_pm(basis::AbstractVector{T}, basis_dict::Dict{T, <:Integer},
         x = (twisted ? inv(basis[i]) : basis[i])
         res = parent(x)()
         for j in 1:size(product_matrix, 2)
-            res = AbstractAlgebra.mul!(res, x, basis[j])
+            res = mul!(res, x, basis[j])
             product_matrix[i,j] = basis_dict[res]
         end
     end

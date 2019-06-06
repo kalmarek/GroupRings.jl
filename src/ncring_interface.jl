@@ -83,8 +83,8 @@ AbstractAlgebra.show_minus_one(::Type{<:GroupRingElem}) = true
 ###############################################################################
 
 function ==(X::GroupRingElem{T}, Y::GroupRingElem{S}) where {T,S}
-    if promote_type(T,S) ≠ T || promote_type(T,S) ≠ S
-        @warn "Comparing elements with incompatible coeffs Rings: $T and $S can be only compared as $(promote_type(T,S))"
+    if promote_type(T,S) ≠ T && promote_type(T,S) ≠ S
+        @warn "Comparing group ring elements over incompatible coefficient Rings:\n$T and $S can be only compared as $(promote_type(T,S))"
     end
     length(X.coeffs) == length(Y.coeffs) || return false
     parent(X).group == parent(Y).group || return false

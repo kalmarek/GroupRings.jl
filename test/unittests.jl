@@ -1,6 +1,6 @@
 using LinearAlgebra
 
-@testset "unit tests" begin
+@testset "Unit tests" begin
     R = AbstractAlgebra.zz
     G = PermGroup(4)
 

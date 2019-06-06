@@ -4,6 +4,7 @@ using AbstractAlgebra
 using GroupRings
 using SparseArrays
 
+@testset "Use tests" begin
 
 @testset "Constructors: PermutationGroup" begin
     G = PermutationGroup(3)
@@ -156,7 +157,7 @@ end
         @test eltype(2*a) == typeof(2)
         @test (2*a).coeffs == 2 .*(a.coeffs)
 
-        wt(c) = "Coefficient ring does not contain scalar $c.\nThe result has coefficients in $(parent(c)) of type $(elem_type(parent(c)))."
+        wt(c) = "Coefficient ring does not contain scalar $c;\nThe resulting GroupRingElem has coefficients in $(parent(c)) of type $(elem_type(parent(c)))."
 
         @test 2.0*a isa GroupRingElem
         @test_logs (:warn, wt(2.0)) eltype(2.0*a) == typeof(2.0)
@@ -366,3 +367,5 @@ end
     (RG(2) - ∗(g*h) - k*l)^2 +
     2(RG(2) - ∗(k) - l)^2 + 2(RG(2) - ∗(g) - h)^2
 end
+
+end # of @testset "Use tests"
