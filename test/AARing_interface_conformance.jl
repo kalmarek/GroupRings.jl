@@ -3,6 +3,10 @@ using AbstractAlgebra
 
 has_base_ring(R::AbstractAlgebra.NCRing) = base_ring(R) != Union{}
 
+function AbstractAlgebra.promote_rule(::Type{S}, ::Type{T}) where {S <: Real, T <: Real}
+    return Base.promote_rule(S, T)
+end
+
 function test_data_type(f,g)
     @testset "Data type" begin
         f,g = deepcopy(f), deepcopy(g)
@@ -229,16 +233,23 @@ function test_promote_rules(f,g)
     f,g = deepcopy(f), deepcopy(g)
     @testset "promote_rules" begin
 
-        @test_broken AbstractAlgebra.promote_rule(typeof(f), Int16) == typeof(f)
-        @test_broken promote_rule(typeof(f), BigInt) == typeof(f)
+        function test_promotes(F::Type, I::Type)
+            @testset "Promote_type with $I" begin
+                @test AbstractAlgebra.promote_rule(F, I) isa Type
+                @test AbstractAlgebra.promote_rule(F, I) != Union{}
+            end
+        end
 
+        test_promotes(typeof(f), Int16)
+        test_promotes(typeof(f), Int)
+
+        test_promotes(typeof(f), typeof(g))
         @test AbstractAlgebra.promote_rule(typeof(f), typeof(g)) == typeof(f)
-        @test AbstractAlgebra.promote_rule(typeof(g), typeof(f)) == typeof(f)
 
         if has_base_ring(parent(f))
             S = base_ring(parent(f))
+            test_promotes(typeof(f), elem_type(S))
             @test AbstractAlgebra.promote_rule(typeof(f), elem_type(S)) == typeof(f)
-            @test AbstractAlgebra.promote_rule(elem_type(S), typeof(f)) == typeof(f)
         end
     end
 end

@@ -4,13 +4,14 @@ using AbstractAlgebra
 using GroupRings
 using SparseArrays
 
-@testset "Group Rings tests" begin
+include("AARing_interface_conformance.jl")
 
+@testset "Group Rings tests" begin
     include("unittests.jl")
     include("usetests.jl")
 
     let
-        include("AARing_interface_conformance.jl")
+
         R = AbstractAlgebra.zz
         G = PermGroup(4)
 
@@ -19,8 +20,6 @@ using SparseArrays
         X = rand(RG, 0.2, -3:3)
         Y = rand(RG, 0.4, -1:1)
 
-        # test_ringinterface(X, Y)
-        test_promote_rules(X, Y)
+        test_ringinterface(X, Y)
     end
-
 end
