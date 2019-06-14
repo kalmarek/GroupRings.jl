@@ -56,6 +56,9 @@ Perform te the addition `X + Y` and store the result in `result`.
 * no checks on arguments parents (i.e. mathematical correctns) are performed
 """
 function add!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
+    result === X && return addeq!(result, Y)
+    result === Y && return addeq!(result, X)
+
     result = _dealias(result, X, Y)
     @inbounds for i in eachindex(result.coeffs)
         result.coeffs[i] = X.coeffs[i] + Y.coeffs[i]
@@ -184,7 +187,8 @@ function scalarmul(a::S, X::GroupRingElem{T}) where {S,T}
         return scalarmul!(base_ring(parent(X))(a), deepcopy(X))
     else
         RG = change_base_ring(parent(X), parent(a))
-        @warn "Coefficient ring does not contain scalar $a;\nThe resulting GroupRingElem has coefficients in $(parent(a)) of type $(elem_type(parent(a)))."
+        @warn "Coefficient ring does not contain scalar $a;
+The resulting GroupRingElem has coefficients in $(parent(a)) of type $(elem_type(parent(a)))."
         return scalarmul!(a, GroupRingElem(base_ring(RG).(X.coeffs), RG))
     end
 end
@@ -196,12 +200,12 @@ end
 *(X::GroupRingElem{S}, a::T) where {T, S} = scalarmul(a, X)
 
 # deambiguations:
-*(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = scalarmul(a, X)
-*(X::GroupRingElem, a::Union{AbstractFloat, Integer, RingElem, Rational}) = scalarmul(a, X)
+*(a::RingElement, X::GroupRingElem) = scalarmul(a, X)
+*(X::GroupRingElem, a::RingElement) = scalarmul(a, X)
 
 # divisions
 (/)(X::GroupRingElem, a) = inv(a)*X
-(//)(X::GroupRingElem, a::Union{Integer, Rational}) = 1//a*X
+(//)(X::GroupRingElem, a::Union{Integer, Rational}) = inv(a)*X
 
 ###############################################################################
 #
