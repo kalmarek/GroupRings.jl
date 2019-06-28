@@ -98,7 +98,7 @@ import Base.promote_rule
 promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
    GroupRingElem{promote_type(T,S)}
 
-function convert(::Type{T}, X::GroupRingElem) where {T<:Number}
+function convert(::Type{T}, X::GroupRingElem) where T<:Number
    return GroupRingElem(Vector{T}(X.coeffs), parent(X))
 end
 
@@ -156,7 +156,7 @@ end
 
 # keep storage type
 
-function (RG::GroupRing)(x::AbstractVector{T}) where T<:Number
+function (RG::GroupRing)(x::AbstractVector{T}) where T
    isdefined(RG, :basis) || throw("Basis of GroupRing not defined. For advanced use the direct constructor of GroupRingElem is provided.")
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    return GroupRingElem(x, RG)
@@ -288,15 +288,15 @@ end
 
 (-)(X::GroupRingElem) = GroupRingElem(-X.coeffs, parent(X))
 
-function mul!(a::T, X::GroupRingElem{T}) where {T<:Number}
+function mul!(a::T, X::GroupRingElem{T}) where T
    X.coeffs .*= a
    return X
 end
 
-mul(a::T, X::GroupRingElem{T}) where {T<:Number} = GroupRingElem(a*X.coeffs, parent(X))
+mul(a::T, X::GroupRingElem{T}) where T = GroupRingElem(a*X.coeffs, parent(X))
 
-function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S<:Number}
-   TT = promote_type(T,S) 
+function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S}
+   TT = promote_type(T,S)
    TT == S || @warn("Scalar and coeffs are in different rings! Promoting result to $(TT)")
    return GroupRingElem(a.*X.coeffs, parent(X))
 end
@@ -343,9 +343,9 @@ end
     fmac!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
-             pm::Array{Int,2}) where {T<:Number}
+             pm::Array{Int,2}) where T
 > Fused multiply-add for group ring coeffs using multiplication table `pm`.
-> The result of X*Y in GroupRing is added in-place to `result`. 
+> The result of X*Y in GroupRing is added in-place to `result`.
 > Notes:
 > * this method will silently produce false results if `X[k]` is non-zero for
 > `k > size(pm,1)`.
@@ -357,11 +357,11 @@ end
 function fmac!(result::AbstractVector{T},
                    X::AbstractVector,
                    Y::AbstractVector,
-                  pm::Array{Int,2}) where {T<:Number}
+                  pm::Array{Int,2}) where T
    z = zero(T)
    s1 = size(pm,1)
    s2 = size(pm,2)
-   
+
    @inbounds for j in 1:s2
       if Y[j] != z
          for i in 1:s1
@@ -376,7 +376,7 @@ end
 
 @doc doc"""
     GRmul!(result::AbstractVector{T}, X::AbstractVector, Y::AbstractVector,
-           pm::Matrix{<:Integer}) where {T<:Number}
+           pm::Matrix{<:Integer}) where T
 > The most specialised multiplication for `X` and `Y` (intended for `coeffs` of
 > `GroupRingElems`), using multiplication table `pm`.
 > Notes:
@@ -389,7 +389,7 @@ end
 function GRmul!(result::AbstractVector{T},
                    X::AbstractVector,
                    Y::AbstractVector,
-                  pm::AbstractMatrix{<:Integer}) where {T<:Number}
+                  pm::AbstractMatrix{<:Integer}) where T
    z = zero(T)
    result .= z
 
@@ -451,7 +451,7 @@ function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    return result
 end
 
-function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where {T<:Number}
+function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where T
    if check
       parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
@@ -465,7 +465,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where {T<
    return result
 end
 
-function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T<:Number, S<:Number}
+function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T,S}
    if check
       parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
@@ -561,7 +561,7 @@ end
 
 function complete!(RG::GroupRing)
    isdefined(RG, :basis) || throw(ArgumentError("Provide basis for completion first!"))
-   if !isdefined(RG, :pm) 
+   if !isdefined(RG, :pm)
       initializepm!(RG, fill=false)
       return RG
    end
