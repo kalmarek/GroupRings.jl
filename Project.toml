@@ -1,7 +1,7 @@
 name = "GroupRings"
 uuid = "0befed6a-bd73-11e8-1e41-a1190947c2f5"
 authors = ["Marek Kaluba <kalmar@amu.edu.pl>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 AbstractAlgebra = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
