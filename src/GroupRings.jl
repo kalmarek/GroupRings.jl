@@ -1,7 +1,7 @@
 module GroupRings
 
 using AbstractAlgebra
-import AbstractAlgebra: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, addeq!, mul!
+import AbstractAlgebra: Group, NCRing, NCRingElem, parent, elem_type, parent_type, addeq!, mul!
 
 using SparseArrays
 using LinearAlgebra
@@ -9,13 +9,16 @@ using Markdown
 
 import Base: convert, show, hash, ==, +, -, *, ^, //, /, length, getindex, setindex!, eltype, one, zero
 
+GroupOrNCRing = Union{AbstractAlgebra.Group, AbstractAlgebra.NCRing}
+GroupOrNCRingElem = Union{AbstractAlgebra.GroupElem, AbstractAlgebra.NCRingElem}
+
 ###############################################################################
 #
 #   GroupRings / GroupRingsElem
 #
 ###############################################################################
 
-mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
+mutable struct GroupRing{Gr<:GroupOrNCRing, T<:GroupOrNCRingElem} <: NCRing
    group::Gr
    basis::Vector{T}
    basis_dict::Dict{T, Int}
@@ -39,7 +42,7 @@ mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    end
 end
 
-mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: RingElem
+mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: NCRingElem
    coeffs::A
    parent::GR
 
@@ -131,13 +134,13 @@ function (RG::GroupRing{<:AbstractAlgebra.NCRing})(i::Int, T::Type=Int)
    return elt
 end
 
-function (RG::GroupRing)(g::GroupElem, T::Type=Int)
+function (RG::GroupRing)(g::GroupOrNCRingElem, T::Type=Int)
    result = RG(T)
    result[RG.group(g)] = one(T)
    return result
 end
 
-function (RG::GroupRing{Gr,T})(V::Vector{T}, S::Type=Int) where {Gr<:Group, T<:GroupElem}
+function (RG::GroupRing{Gr,T})(V::Vector{T}, S::Type=Int) where {Gr, T}
    res = RG(S)
    for g in V
       res[g] += one(S)
@@ -181,7 +184,7 @@ function getindex(X::GroupRingElem, n::Int)
    return X.coeffs[n]
 end
 
-function getindex(X::GroupRingElem, g::GroupElem)
+function getindex(X::GroupRingElem, g::GroupOrNCRingElem)
    return X.coeffs[parent(X).basis_dict[g]]
 end
 
@@ -189,7 +192,7 @@ function setindex!(X::GroupRingElem, value, n::Int)
    X.coeffs[n] = value
 end
 
-function setindex!(X::GroupRingElem, value, g::GroupElem)
+function setindex!(X::GroupRingElem, value, g::GroupOrNCRingElem)
    RG = parent(X)
    if !(g in keys(RG.basis_dict))
       g = (RG.group)(g)
@@ -525,8 +528,8 @@ end
 
 reverse_dict(iter) = reverse_dict(Int, iter)
 
-function create_pm(basis::Vector{T}, basis_dict::Dict{T, Int},
-   limit::Int=length(basis); twisted::Bool=false, check=true) where {T<:GroupElem}
+function create_pm(basis::AbstractVector{T}, basis_dict::Dict{T, Int},
+   limit::Int=length(basis); twisted::Bool=false, check=true) where T
    product_matrix = zeros(Int, (limit,limit))
    Threads.@threads for i in 1:limit
       x = basis[i]
@@ -543,7 +546,7 @@ function create_pm(basis::Vector{T}, basis_dict::Dict{T, Int},
    return product_matrix
 end
 
-create_pm(b::Vector{T}) where {T<:GroupElem} = create_pm(b, reverse_dict(b))
+create_pm(b::AbstractVector{<:GroupOrNCRingElem}) = create_pm(b, reverse_dict(b))
 
 function check_pm(product_matrix, basis, twisted=false)
    idx = findfirst(product_matrix' .== 0)
