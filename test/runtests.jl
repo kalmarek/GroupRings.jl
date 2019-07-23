@@ -3,6 +3,7 @@ using Test
 using AbstractAlgebra
 using GroupRings
 using SparseArrays
+using LinearAlgebra
 
 include("AARing_interface_conformance.jl")
 

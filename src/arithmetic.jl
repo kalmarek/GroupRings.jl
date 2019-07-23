@@ -59,10 +59,9 @@ function add!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
     result === X && return addeq!(result, Y)
     result === Y && return addeq!(result, X)
 
-    result = _dealias(result, X, Y)
-    @inbounds for i in eachindex(result.coeffs)
-        result.coeffs[i] = X.coeffs[i] + Y.coeffs[i]
-    end
+    result = zero!(result)
+    # @inbounds for i in eachindex(result.coeffs)
+    result.coeffs .= X.coeffs .+ Y.coeffs
     return result
 end
 
@@ -108,7 +107,7 @@ end
 
 function +(X::GroupRingElem{T, GR}, Y::GroupRingElem{T, GR}) where {T, GR<:GroupRing}
     # @assert parent(X) == parent(Y)
-    return add!(X, X, Y)
+    return add!(zero(parent(X)), X, Y)
 end
 
 function +(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S,T}
@@ -205,7 +204,7 @@ end
 
 # divisions
 (/)(X::GroupRingElem, a) = inv(a)*X
-(//)(X::GroupRingElem, a::Union{Integer, Rational}) = inv(a)*X
+(//)(X::GroupRingElem, a::Union{Integer, Rational}) = 1//a*X
 
 ###############################################################################
 #

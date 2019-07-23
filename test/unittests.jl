@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 @testset "Unit tests" begin
     R = AbstractAlgebra.zz
     G = PermGroup(4)
@@ -38,7 +36,7 @@ using LinearAlgebra
         @test length(X.coeffs.nzind) < k
         @test norm(X, 4) isa Float64
 
-        @test aug(X) isa Int
+        @test aug(X) isa elem_type(base_ring(RG))
         @test supp(X) isa Vector{elem_type(G)}
         @test [RG[g] for g in supp(X)] == X.coeffs.nzind
 
@@ -90,14 +88,15 @@ using LinearAlgebra
         for (inplace_op, op) in [(AbstractAlgebra.mul!, *),
                                (AbstractAlgebra.add!, +)]
             let X = X, Y = Y
-                @test inplace_op(X, X, Y) == op(X, Y)
-                @test inplace_op(X, Y, X) == op(Y, X)
+                @test op(X, Y) == inplace_op(X, X, Y)
+                @test op(Y, X) == inplace_op(X, Y, X)
 
-                Z = inplace_op(X, X, Y)
-                @test Z == op(X, Y)
 
-                Z = inplace_op(Z, Y, X)
-                @test Z == op(Y, X)
+                Z = op(X, Y)
+                @test Z == inplace_op(Z, X, Y)
+
+                Z = op(Y, X)
+                @test Z == inplace_op(Z, Y, X)
             end
         end
 
