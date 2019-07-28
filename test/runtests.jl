@@ -9,7 +9,7 @@ using SparseArrays
    @testset "Constructors: PermutationGroup" begin
       G = PermutationGroup(3)
 
-      @test isa(GroupRing(G), AbstractAlgebra.Ring)
+      @test isa(GroupRing(G), AbstractAlgebra.NCRing)
       @test isa(GroupRing(G), GroupRing)
 
       RG = GroupRing(G)
@@ -115,6 +115,20 @@ using SparseArrays
       @test string(-a) == " - 2() - 1(1,2,3)"
 
       @test length(a) == 2
+
+      @testset "RSL(3,Z)" begin
+         N = 3
+         halfradius = 2
+         M = MatrixAlgebra(zz, N)
+         E(M, i,j) = (e_ij = one(M); e_ij[i,j] = 1; e_ij)
+         S = [E(M, i,j) for i in 1:N for j in 1:N if i≠j]
+         S = unique([S; inv.(S)])
+         E_R, sizes = Groups.generate_balls(S, radius=2*halfradius)
+         E_rdict = GroupRings.reverse_dict(E_R)
+         pm = GroupRings.create_pm(E_R, E_rdict, sizes[halfradius]; twisted=true);
+
+         @test GroupRing(M, E_R, E_rdict, pm) isa GroupRing
+      end
    end
 
    @testset "Arithmetic" begin
@@ -153,7 +167,7 @@ using SparseArrays
          @test isa(b//4, GroupRingElem)
          @test eltype(b//4) == Rational{Int}
 
-         @test isa(b//big(4), RingElem)
+         @test isa(b//big(4), NCRingElem)
          @test eltype(b//(big(4)//1)) == Rational{BigInt}
 
          @test isa(a//1, GroupRingElem)
@@ -208,18 +222,18 @@ using SparseArrays
          @test supp(z) == parent(z).basis
          @test supp(RG(1) + RG(perm"(2,3)")) == [G(), perm"(2,3)"]
          @test supp(a) == [perm"(3)", perm"(2,3)", perm"(1,2,3)"]
-         
+
       end
-      
+
       @testset "HPC multiplicative operations" begin
-      
+
          G = PermutationGroup(5)
          RG = GroupRing(G, cachedmul=true)
          RG2 = GroupRing(G, cachedmul=false)
-         
+
          Z = RG()
          W = RG()
-         
+
          for g in [rand(G) for _ in 1:30]
             X = RG(g)
             Y = -RG(inv(g))
@@ -227,26 +241,26 @@ using SparseArrays
                X[rand(G)] += rand(1:3)
                Y[rand(G)] -= rand(1:3)
             end
-            
-            @test X*Y == 
-                  RG2(X)*RG2(Y) == 
+
+            @test X*Y ==
+                  RG2(X)*RG2(Y) ==
                   GroupRings.mul!(Z, X, Y)
-            
+
             @test Z.coeffs == GroupRings.GRmul!(W.coeffs, X.coeffs, Y.coeffs, RG.pm) == W.coeffs
-            @test (2*X*Y).coeffs == 
+            @test (2*X*Y).coeffs ==
                GroupRings.fmac!(W.coeffs, X.coeffs, Y.coeffs, RG.pm) ==
                GroupRings.mul!(2, X*Y).coeffs
          end
       end
    end
-   
+
    @testset "SumOfSquares in group rings" begin
       ∗ = star
-      
+
       G = FreeGroup(["g", "h", "k", "l"])
       S = G.(G.gens)
       S = [S; inv.(S)]
-      
+
       ID = G()
       RADIUS=3
       @time E_R, sizes = Groups.generate_balls(S, ID, radius=2*RADIUS);
@@ -254,14 +268,14 @@ using SparseArrays
       E_rdict = GroupRings.reverse_dict(E_R)
       pm = GroupRings.create_pm(E_R, E_rdict, sizes[RADIUS]; twisted=true);
       RG = GroupRing(G, E_R, E_rdict, pm)
-      
+
       g = RG.basis[2]
       h = RG.basis[3]
       k = RG.basis[4]
       l = RG.basis[5]
       G = (1-RG(g))
       @test G^2 == 2 - RG(g) - ∗(RG(g))
-      
+
       G = (1-RG(g))
       H = (1-RG(h))
       K = (1-RG(k))
@@ -271,59 +285,59 @@ using SparseArrays
 
       X = (2 - ∗(RG(g)) - RG(h))
       Y = (2 - ∗(RG(g*h)) - RG(k))
-      
+
       @test -(2 - RG(g*h) - ∗(RG(g*h))) + 2G^2 + 2H^2 == X^2
       @test (2 - RG(g*h) - ∗(RG(g*h))) == GH^2
       @test -(2 - RG(g*h*k) - ∗(RG(g*h*k))) + 2GH^2 + 2K^2 == Y^2
-      @test -(2 - RG(g*h*k) - ∗(RG(g*h*k))) + 
-         2(GH^2 - 2G^2 - 2H^2) + 
-         4G^2 + 4H^2 + 2K^2 == 
+      @test -(2 - RG(g*h*k) - ∗(RG(g*h*k))) +
+         2(GH^2 - 2G^2 - 2H^2) +
+         4G^2 + 4H^2 + 2K^2 ==
             Y^2
-      
+
       @test GH^2 - 2G^2 - 2H^2 == - X^2
       @test -(2 - RG(g*h*k) - ∗(RG(g*h*k))) + 4G^2 + 4H^2 + 2K^2 == 2X^2 + Y^2
-      
+
       @test GH^2 == 2G^2 + 2H^2 - (2 - ∗(RG(g)) - RG(h))^2
-      @test KL^2 == 2K^2 + 2L^2 - (2 - ∗(RG(k)) - RG(l))^2 
-      
+      @test KL^2 == 2K^2 + 2L^2 - (2 - ∗(RG(k)) - RG(l))^2
+
       @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 2*GH^2 + 2*KL^2 ==
          (2 - ∗(RG(g*h)) - RG(k*l))^2
-      
-      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
-         2(2G^2 + 2H^2 - (2 - ∗(RG(g)) - RG(h))^2) + 
-         2(2K^2 + 2L^2 - (2 - ∗(RG(k)) - RG(l))^2) == 
+
+      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) +
+         2(2G^2 + 2H^2 - (2 - ∗(RG(g)) - RG(h))^2) +
+         2(2K^2 + 2L^2 - (2 - ∗(RG(k)) - RG(l))^2) ==
             (2 - ∗(RG(g*h)) - RG(k*l))^2
-      
-      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
-         2(2G^2 + 2H^2) + 
+
+      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) +
+         2(2G^2 + 2H^2) +
          2(2K^2 + 2L^2) ==
-            (2 - ∗(RG(g*h)) - RG(k*l))^2 + 
-            2(2 - ∗(RG(g)) - RG(h))^2 + 
+            (2 - ∗(RG(g*h)) - RG(k*l))^2 +
+            2(2 - ∗(RG(g)) - RG(h))^2 +
             2(2 - ∗(RG(k)) - RG(l))^2
-         
-      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
+
+      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) +
          2(2 - ∗(RG(g*h*k)) - RG(g*h*k)) + 2L^2 ==
             (2 - ∗(RG(g*h*k)) - RG(l))^2
-         
-      @test 2 - ∗(RG(g*h*k)) - RG(g*h*k) == 
+
+      @test 2 - ∗(RG(g*h*k)) - RG(g*h*k) ==
          2GH^2 + 2K^2 - (2 - ∗(RG(g*h)) - RG(k))^2
-      
-      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
+
+      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) +
          2(2GH^2 + 2K^2 - (2 - ∗(RG(g*h)) - RG(k))^2) + 2L^2 ==
             (2 - ∗(RG(g*h*k)) - RG(l))^2
-      
-      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
+
+      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) +
          2(2GH^2 + 2K^2) +  2L^2 ==
-            (2 - ∗(RG(g*h*k)) - RG(l))^2 + 
+            (2 - ∗(RG(g*h*k)) - RG(l))^2 +
             2(2 - ∗(RG(g*h)) - RG(k))^2
-            
-      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
+
+      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) +
          8G^2 + 8H^2 + 4K^2 + 2L^2 ==
             (2 - ∗(RG(g*h*k)) - RG(l))^2 + 2(2 - ∗(RG(g*h)) - RG(k))^2 + 4(2 - ∗(RG(g)) - RG(h))^2
-            
-      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 
+
+      @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) +
          2GH^2 + 2KL^2 == (2 - ∗(RG(g*h)) - RG(k*l))^2
-         
+
       @test -(2 - ∗(RG(g*h*k*l)) - RG(g*h*k*l)) + 2(2G^2 + 2H^2) + 2(2K^2 + 2L^2) ==
          (2 - ∗(RG(g*h)) - RG(k*l))^2 + 2(2 - ∗(RG(k)) - RG(l))^2 + 2(2 - ∗(RG(g)) - RG(h))^2
    end

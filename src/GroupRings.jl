@@ -1,7 +1,7 @@
 module GroupRings
 
 using AbstractAlgebra
-import AbstractAlgebra: Group, GroupElem, Ring, RingElem, parent, elem_type, parent_type, addeq!, mul!
+import AbstractAlgebra: Group, NCRing, NCRingElem, parent, elem_type, parent_type, addeq!, mul!
 
 using SparseArrays
 using LinearAlgebra
@@ -9,13 +9,16 @@ using Markdown
 
 import Base: convert, show, hash, ==, +, -, *, ^, //, /, length, getindex, setindex!, eltype, one, zero
 
+GroupOrNCRing = Union{AbstractAlgebra.Group, AbstractAlgebra.NCRing}
+GroupOrNCRingElem = Union{AbstractAlgebra.GroupElem, AbstractAlgebra.NCRingElem}
+
 ###############################################################################
 #
 #   GroupRings / GroupRingsElem
 #
 ###############################################################################
 
-mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
+mutable struct GroupRing{Gr<:GroupOrNCRing, T<:GroupOrNCRingElem} <: NCRing
    group::Gr
    basis::Vector{T}
    basis_dict::Dict{T, Int}
@@ -39,7 +42,7 @@ mutable struct GroupRing{Gr<:Group, T<:GroupElem} <: Ring
    end
 end
 
-mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: RingElem
+mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: NCRingElem
    coeffs::A
    parent::GR
 
@@ -98,7 +101,7 @@ import Base.promote_rule
 promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
    GroupRingElem{promote_type(T,S)}
 
-function convert(::Type{T}, X::GroupRingElem) where {T<:Number}
+function convert(::Type{T}, X::GroupRingElem) where T<:Number
    return GroupRingElem(Vector{T}(X.coeffs), parent(X))
 end
 
@@ -112,7 +115,7 @@ end
 
 zero(RG::GroupRing, T::Type=Int) = RG(T)
 one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
-one(RG::GroupRing{<:MatSpace}, T::Type=Int) = RG(one(RG.group), T)
+one(RG::GroupRing{<:AbstractAlgebra.NCRing}, T::Type=Int) = RG(one(RG.group), T)
 
 function (RG::GroupRing)(T::Type=Int)
    isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
@@ -125,19 +128,19 @@ function (RG::GroupRing)(i::Int, T::Type=Int)
    return elt
 end
 
-function (RG::GroupRing{<:MatSpace})(i::Int, T::Type=Int)
+function (RG::GroupRing{<:AbstractAlgebra.NCRing})(i::Int, T::Type=Int)
    elt = RG(T)
    elt[one(RG.group)] = i
    return elt
 end
 
-function (RG::GroupRing)(g::GroupElem, T::Type=Int)
+function (RG::GroupRing)(g::GroupOrNCRingElem, T::Type=Int)
    result = RG(T)
    result[RG.group(g)] = one(T)
    return result
 end
 
-function (RG::GroupRing{Gr,T})(V::Vector{T}, S::Type=Int) where {Gr<:Group, T<:GroupElem}
+function (RG::GroupRing{Gr,T})(V::Vector{T}, S::Type=Int) where {Gr, T}
    res = RG(S)
    for g in V
       res[g] += one(S)
@@ -156,7 +159,7 @@ end
 
 # keep storage type
 
-function (RG::GroupRing)(x::AbstractVector{T}) where T<:Number
+function (RG::GroupRing)(x::AbstractVector{T}) where T
    isdefined(RG, :basis) || throw("Basis of GroupRing not defined. For advanced use the direct constructor of GroupRingElem is provided.")
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    return GroupRingElem(x, RG)
@@ -181,7 +184,7 @@ function getindex(X::GroupRingElem, n::Int)
    return X.coeffs[n]
 end
 
-function getindex(X::GroupRingElem, g::GroupElem)
+function getindex(X::GroupRingElem, g::GroupOrNCRingElem)
    return X.coeffs[parent(X).basis_dict[g]]
 end
 
@@ -189,7 +192,7 @@ function setindex!(X::GroupRingElem, value, n::Int)
    X.coeffs[n] = value
 end
 
-function setindex!(X::GroupRingElem, value, g::GroupElem)
+function setindex!(X::GroupRingElem, value, g::GroupOrNCRingElem)
    RG = parent(X)
    if !(g in keys(RG.basis_dict))
       g = (RG.group)(g)
@@ -288,15 +291,15 @@ end
 
 (-)(X::GroupRingElem) = GroupRingElem(-X.coeffs, parent(X))
 
-function mul!(a::T, X::GroupRingElem{T}) where {T<:Number}
+function mul!(a::T, X::GroupRingElem{T}) where T
    X.coeffs .*= a
    return X
 end
 
-mul(a::T, X::GroupRingElem{T}) where {T<:Number} = GroupRingElem(a*X.coeffs, parent(X))
+mul(a::T, X::GroupRingElem{T}) where T = GroupRingElem(a*X.coeffs, parent(X))
 
-function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S<:Number}
-   TT = promote_type(T,S) 
+function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S}
+   TT = promote_type(T,S)
    TT == S || @warn("Scalar and coeffs are in different rings! Promoting result to $(TT)")
    return GroupRingElem(a.*X.coeffs, parent(X))
 end
@@ -343,9 +346,9 @@ end
     fmac!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
-             pm::Array{Int,2}) where {T<:Number}
+             pm::Array{Int,2}) where T
 > Fused multiply-add for group ring coeffs using multiplication table `pm`.
-> The result of X*Y in GroupRing is added in-place to `result`. 
+> The result of X*Y in GroupRing is added in-place to `result`.
 > Notes:
 > * this method will silently produce false results if `X[k]` is non-zero for
 > `k > size(pm,1)`.
@@ -357,11 +360,11 @@ end
 function fmac!(result::AbstractVector{T},
                    X::AbstractVector,
                    Y::AbstractVector,
-                  pm::Array{Int,2}) where {T<:Number}
+                  pm::Array{Int,2}) where T
    z = zero(T)
    s1 = size(pm,1)
    s2 = size(pm,2)
-   
+
    @inbounds for j in 1:s2
       if Y[j] != z
          for i in 1:s1
@@ -376,7 +379,7 @@ end
 
 @doc doc"""
     GRmul!(result::AbstractVector{T}, X::AbstractVector, Y::AbstractVector,
-           pm::Matrix{<:Integer}) where {T<:Number}
+           pm::Matrix{<:Integer}) where T
 > The most specialised multiplication for `X` and `Y` (intended for `coeffs` of
 > `GroupRingElems`), using multiplication table `pm`.
 > Notes:
@@ -389,7 +392,7 @@ end
 function GRmul!(result::AbstractVector{T},
                    X::AbstractVector,
                    Y::AbstractVector,
-                  pm::AbstractMatrix{<:Integer}) where {T<:Number}
+                  pm::AbstractMatrix{<:Integer}) where T
    z = zero(T)
    result .= z
 
@@ -451,7 +454,7 @@ function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    return result
 end
 
-function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where {T<:Number}
+function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where T
    if check
       parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
@@ -465,7 +468,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where {T<
    return result
 end
 
-function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T<:Number, S<:Number}
+function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T,S}
    if check
       parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
@@ -525,8 +528,8 @@ end
 
 reverse_dict(iter) = reverse_dict(Int, iter)
 
-function create_pm(basis::Vector{T}, basis_dict::Dict{T, Int},
-   limit::Int=length(basis); twisted::Bool=false, check=true) where {T<:GroupElem}
+function create_pm(basis::AbstractVector{T}, basis_dict::Dict{T, Int},
+   limit::Int=length(basis); twisted::Bool=false, check=true) where T
    product_matrix = zeros(Int, (limit,limit))
    Threads.@threads for i in 1:limit
       x = basis[i]
@@ -543,7 +546,7 @@ function create_pm(basis::Vector{T}, basis_dict::Dict{T, Int},
    return product_matrix
 end
 
-create_pm(b::Vector{T}) where {T<:GroupElem} = create_pm(b, reverse_dict(b))
+create_pm(b::AbstractVector{<:GroupOrNCRingElem}) = create_pm(b, reverse_dict(b))
 
 function check_pm(product_matrix, basis, twisted=false)
    idx = findfirst(product_matrix' .== 0)
@@ -561,7 +564,7 @@ end
 
 function complete!(RG::GroupRing)
    isdefined(RG, :basis) || throw(ArgumentError("Provide basis for completion first!"))
-   if !isdefined(RG, :pm) 
+   if !isdefined(RG, :pm)
       initializepm!(RG, fill=false)
       return RG
    end
