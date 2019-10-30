@@ -537,7 +537,7 @@ function create_pm(basis::AbstractVector{T}, basis_dict::Dict{T, Int},
          x = inv(x)
       end
       for j in 1:limit
-         product_matrix[i,j] = basis_dict[x*basis[j]]
+         product_matrix[i,j] = get(basis_dict, x*basis[j], 0)
       end
    end
 
@@ -553,16 +553,13 @@ function check_pm(product_matrix, basis, twisted=false)
    if idx != nothing
       @warn("Product is not supported on basis")
       i,j = Tuple(idx)
-      x = basis[i]
-      if twisted
-         x = inv(x)
-      end
+      x = (twisted ? inv(basis[i]) : basis[i])
       throw(KeyError(x*basis[j]))
    end
    return true
 end
 
-function complete!(RG::GroupRing)
+function complete!(RG::GroupRing, twisted::Bool=false)
    isdefined(RG, :basis) || throw(ArgumentError("Provide basis for completion first!"))
    if !isdefined(RG, :pm)
       initializepm!(RG, fill=false)
@@ -572,13 +569,11 @@ function complete!(RG::GroupRing)
    warning = false
    for idx in findall(RG.pm .== 0)
       i,j = Tuple(idx)
-      g = RG.basis[i]*RG.basis[j]
+      g = (twisted ? inv(RG.basis[i]) : RG.basis[i])*RG.basis[j]
       if haskey(RG.basis_dict, g)
           RG.pm[i,j] = RG.basis_dict[g]
       else
-         if !warning
-            warning = true
-         end
+         warning = true
       end
    end
    warning && @warn("Some products were not supported on basis")

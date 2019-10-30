@@ -61,14 +61,11 @@ using SparseArrays
       B = GroupRing(F, basis, d, pm)
       @test A == B
 
-      RF = GroupRing(F, basis, d, create_pm(basis, d, check=false))
-      nz1 = count(!iszero, RF.pm)
-      @test nz1 > 1000
+      RF = GroupRing(F, basis, cachedmul=true)
+      @test count(!iszero, RF.pm) == 0
 
       GroupRings.complete!(RF)
-      nz2 = count(!iszero, RF.pm)
-      @test nz2 > nz1
-      @test nz2 == 45469
+      @test count(!iszero, RF.pm) == 45469
 
       g = B()
       s = S[2]
