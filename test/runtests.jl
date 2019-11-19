@@ -49,7 +49,7 @@ using SparseArrays
       S = gens(F)
       append!(S, [inv(s) for s in S])
 
-      basis, sizes = Groups.generate_balls(S, F(), radius=4)
+      basis, sizes = Groups.generate_balls(S, one(F), radius=4)
       d = GroupRings.reverse_dict(basis)
       @test_throws KeyError create_pm(basis)
       pm = create_pm(basis, d, sizes[2])
@@ -67,7 +67,7 @@ using SparseArrays
       GroupRings.complete!(RF)
       @test count(!iszero, RF.pm) == 45469
 
-      g = B()
+      g = zero(B)
       s = S[2]
       g[s] = 1
       @test g == B(s)
@@ -217,7 +217,7 @@ using SparseArrays
          @test aug(z) == 0
 
          @test supp(z) == parent(z).basis
-         @test supp(RG(1) + RG(perm"(2,3)")) == [G(), perm"(2,3)"]
+         @test supp(RG(1) + RG(perm"(2,3)")) == [one(G), perm"(2,3)"]
          @test supp(a) == [perm"(3)", perm"(2,3)", perm"(1,2,3)"]
 
       end
@@ -228,8 +228,8 @@ using SparseArrays
          RG = GroupRing(G, cachedmul=true)
          RG2 = GroupRing(G, cachedmul=false)
 
-         Z = RG()
-         W = RG()
+         Z = zero(RG)
+         W = zero(RG)
 
          for g in [rand(G) for _ in 1:30]
             X = RG(g)
@@ -258,7 +258,7 @@ using SparseArrays
       S = G.(G.gens)
       S = [S; inv.(S)]
 
-      ID = G()
+      ID = one(G)
       RADIUS=3
       @time E_R, sizes = Groups.generate_balls(S, ID, radius=2*RADIUS);
       @test sizes == [9, 65, 457, 3201, 22409, 156865]
