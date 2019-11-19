@@ -53,7 +53,7 @@ mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: NCRingElem
             "Can't create GroupRingElem -- lengths differ: length(c) =
             $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
          else
-            @warn("Basis of the GroupRing is not defined.")
+            # @warn("Basis of the GroupRing is not defined.")
          end
       end
       return new{T, A, GR}(c, RG)
@@ -114,7 +114,7 @@ end
 # sparse storage:
 
 zero(RG::GroupRing, T::Type=Int) = RG(T)
-one(RG::GroupRing, T::Type=Int) = RG(RG.group(), T)
+one(RG::GroupRing, T::Type=Int) = RG(one(RG.group), T)
 one(RG::GroupRing{<:AbstractAlgebra.NCRing}, T::Type=Int) = RG(one(RG.group), T)
 
 function (RG::GroupRing)(T::Type=Int)
@@ -124,7 +124,7 @@ end
 
 function (RG::GroupRing)(i::Int, T::Type=Int)
    elt = RG(T)
-   elt[RG.group()] = i
+   elt[one(RG.group)] = i
    return elt
 end
 
@@ -229,7 +229,7 @@ function show(io::IO, X::GroupRingElem)
    RG = parent(X)
    T = eltype(X.coeffs)
    if X.coeffs == zero(X.coeffs)
-      print(io, "$(zero(T))*$((RG.group)())")
+      print(io, "$(zero(T))*$(one(RG.group))")
    elseif isdefined(RG, :basis)
       non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findall(!iszero, X.coeffs))
       elts = String[]
