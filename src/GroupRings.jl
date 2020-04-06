@@ -4,8 +4,7 @@ using AbstractAlgebra
 import AbstractAlgebra: Group, NCRing, NCRingElem, parent, elem_type, parent_type, addeq!, mul!
 
 using SparseArrays
-using LinearAlgebra
-using Markdown
+import LinearAlgebra
 
 import Base: convert, show, hash, ==, +, -, *, ^, //, /, length, getindex, setindex!, eltype, one, zero
 
@@ -72,7 +71,7 @@ function GroupRingElem(c::AbstractVector, RG::GroupRing)
    return GroupRingElem{eltype(c), typeof(c), typeof(RG)}(c, RG)
 end
 
-function GroupRing(G::Generic.PermGroup; cachedmul::Bool=false)
+function GroupRing(G::Generic.SymmetricGroup; cachedmul::Bool=false)
    return GroupRing(G, vec(collect(G)), cachedmul=cachedmul)
 end
 
@@ -342,7 +341,7 @@ function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
    addeq!((-Y), X)
 end
 
-@doc doc"""
+"""
     fmac!(result::AbstractVector{T},
               X::AbstractVector,
               Y::AbstractVector,
@@ -377,7 +376,7 @@ function fmac!(result::AbstractVector{T},
    return result
 end
 
-@doc doc"""
+"""
     GRmul!(result::AbstractVector{T}, X::AbstractVector, Y::AbstractVector,
            pm::Matrix{<:Integer}) where T
 > The most specialised multiplication for `X` and `Y` (intended for `coeffs` of
@@ -399,7 +398,7 @@ function GRmul!(result::AbstractVector{T},
    return fmac!(result, X, Y, pm)
 end
 
-@doc doc"""
+"""
     mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
 > In-place multiplication for `GroupRingElem`s `X` and `Y`.
 > `mul!` will make use the initialised entries of `pm` attribute of

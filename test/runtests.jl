@@ -6,8 +6,8 @@ using SparseArrays
 
 
 @testset "GroupRings" begin
-   @testset "Constructors: PermutationGroup" begin
-      G = PermutationGroup(3)
+   @testset "Constructors: SymmetricGroup" begin
+      G = SymmetricGroup(3)
 
       @test isa(GroupRing(G), AbstractAlgebra.NCRing)
       @test isa(GroupRing(G), GroupRing)
@@ -18,7 +18,7 @@ using SparseArrays
       @test isdefined(RG, :basis_dict) == true
       @test isdefined(RG, :pm) == false
 
-      @test isa(GroupRing(PermutationGroup(6), rand(1:6, 6,6)), GroupRing)
+      @test isa(GroupRing(SymmetricGroup(6), rand(1:6, 6,6)), GroupRing)
 
       RG = GroupRing(G, cachedmul=true)
       @test isdefined(RG, :pm) == true
@@ -76,7 +76,7 @@ using SparseArrays
    end
 
    @testset "GroupRingElems constructors/basic manipulation" begin
-      G = PermutationGroup(3)
+      G = SymmetricGroup(3)
       RG = GroupRing(G, cachedmul=true)
       a = rand(6)
       @test isa(GroupRingElem(a, RG), GroupRingElem)
@@ -129,7 +129,7 @@ using SparseArrays
    end
 
    @testset "Arithmetic" begin
-      G = PermutationGroup(3)
+      G = SymmetricGroup(3)
       RG = GroupRing(G, cachedmul=true)
       a = RG(ones(Int, order(G)))
 
@@ -224,7 +224,7 @@ using SparseArrays
 
       @testset "HPC multiplicative operations" begin
 
-         G = PermutationGroup(5)
+         G = SymmetricGroup(5)
          RG = GroupRing(G, cachedmul=true)
          RG2 = GroupRing(G, cachedmul=false)
 
