@@ -514,7 +514,7 @@ end
 
 length(X::GroupRingElem) = count(!iszero, X.coeffs)
 
-LinearAlgebra.norm(X::GroupRingElem, p::Int=2) = norm(X.coeffs, p)
+LinearAlgebra.norm(X::GroupRingElem, p::Int=2) = LinearAlgebra.norm(X.coeffs, p)
 
 aug(X::GroupRingElem) = sum(X.coeffs)
 
