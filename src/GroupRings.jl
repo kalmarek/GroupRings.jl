@@ -47,7 +47,7 @@ mutable struct GroupRingElem{T, A<:AbstractVector, GR<:GroupRing} <: NCRingElem
 
    function GroupRingElem{T, A, GR}(c::AbstractVector{T}, RG::GR, check=true) where {T, A, GR}
       if check
-         if isdefined(RG, :basis)
+         if hasbasis(RG)
             length(c) == length(RG.basis) || throw(
             "Can't create GroupRingElem -- lengths differ: length(c) =
             $(length(c)) != $(length(RG.basis)) = length(RG.basis)")
@@ -117,7 +117,7 @@ one(RG::GroupRing, T::Type=Int) = RG(one(RG.group), T)
 one(RG::GroupRing{<:AbstractAlgebra.NCRing}, T::Type=Int) = RG(one(RG.group), T)
 
 function (RG::GroupRing)(T::Type=Int)
-   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
+   hasbasis(RG) || throw("Can not coerce without basis of GroupRing")
    return GroupRingElem(spzeros(T,length(RG.basis)), RG)
 end
 
@@ -148,7 +148,7 @@ function (RG::GroupRing{Gr,T})(V::Vector{T}, S::Type=Int) where {Gr, T}
 end
 
 function (RG::GroupRing)(f::Function, X::GroupRingElem{T}) where T
-   isdefined(RG, :basis) || throw("Can not coerce without basis of GroupRing")
+   hasbasis(RG) || throw("Can not coerce without basis of GroupRing")
    res = RG(T)
    for g in supp(X)
       res[f(g)] = X[g]
@@ -159,7 +159,7 @@ end
 # keep storage type
 
 function (RG::GroupRing)(x::AbstractVector{T}) where T
-   isdefined(RG, :basis) || throw("Basis of GroupRing not defined. For advanced use the direct constructor of GroupRingElem is provided.")
+   hasbasis(RG) || throw("Basis of GroupRing not defined. For advanced use the direct constructor of GroupRingElem is provided.")
    length(x) == length(RG.basis) || throw("Can not coerce to $RG: lengths differ")
    return GroupRingElem(x, RG)
 end
@@ -229,7 +229,7 @@ function show(io::IO, X::GroupRingElem)
    T = eltype(X.coeffs)
    if X.coeffs == zero(X.coeffs)
       print(io, "$(zero(T))*$(one(RG.group))")
-   elseif isdefined(RG, :basis)
+   elseif hasbasis(RG)
       non_zeros = ((X.coeffs[i], RG.basis[i]) for i in findall(!iszero, X.coeffs))
       elts = String[]
       for (c,g) in non_zeros
@@ -274,13 +274,15 @@ end
 
 function (==)(A::GroupRing, B::GroupRing)
    A.group == B.group || return false
-   if isdefined(A, :basis) && isdefined(B, :basis)
+   if hasbasis(A) && hasbasis(B)
       A.basis == B.basis || return false
    elseif isdefined(A, :pm) && isdefined(B, :pm)
       A.pm == B.pm || return false
    end
    return true
 end
+
+hasbasis(A::GroupRing) = isdefined(A, :basis)
 
 ###############################################################################
 #
@@ -457,7 +459,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where T
    if check
       parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
-   if isdefined(parent(X), :basis)
+   if hasbasis(parent(X))
       result = parent(X)(similar(X.coeffs))
       result = mul!(result, X, Y)
    else
@@ -475,7 +477,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T,
    TT = typeof(first(X.coeffs)*first(Y.coeffs))
    @warn("Multiplying elements with different base rings! Promoting the result to $TT.")
 
-   if isdefined(parent(X), :basis)
+   if hasbasis(parent(X))
       result = parent(X)(similar(X.coeffs))
       result = convert(TT, result)
       result = mul!(result, X, Y)
@@ -495,7 +497,7 @@ end
 
 function star(X::GroupRingElem{T}) where T
    RG = parent(X)
-   isdefined(RG, :basis) || throw("*-involution without basis is not possible")
+   hasbasis(RG) || throw("*-involution without basis is not possible")
    result = RG(T)
    for (i,c) in enumerate(X.coeffs)
       if c != zero(T)
@@ -559,7 +561,7 @@ function check_pm(product_matrix, basis, twisted=false)
 end
 
 function complete!(RG::GroupRing, twisted::Bool=false)
-   isdefined(RG, :basis) || throw(ArgumentError("Provide basis for completion first!"))
+   hasbasis(RG) || throw(ArgumentError("Provide basis for completion first!"))
    if !isdefined(RG, :pm)
       initializepm!(RG, fill=false)
       return RG
@@ -580,7 +582,7 @@ function complete!(RG::GroupRing, twisted::Bool=false)
 end
 
 function initializepm!(RG::GroupRing; fill::Bool=false)
-   isdefined(RG, :basis) || throw("For baseless Group Rings You need to provide pm.")
+   hasbasis(RG) || throw("For baseless Group Rings You need to provide pm.")
    isdefined(RG, :pm) && return RG
    if fill
       RG.pm = try
