@@ -501,12 +501,15 @@ function star(X::GroupRingElem{T}) where T
    result = RG(T)
    for (i,c) in enumerate(X.coeffs)
       if c != zero(T)
-         g = inv(RG.basis[i])
+         g = star(RG.basis[i])
          result[g] = c
       end
    end
    return result
 end
+
+star(g::GroupElem) = inv(g)
+star(r::NCRingElem) = inv(r)
 
 ###############################################################################
 #
@@ -535,7 +538,7 @@ function create_pm(basis::AbstractVector{T}, basis_dict::Dict{T, Int},
    Threads.@threads for i in 1:limit
       x = basis[i]
       if twisted
-         x = inv(x)
+         x = star(x)
       end
       for j in 1:limit
          product_matrix[i,j] = get(basis_dict, x*basis[j], 0)
@@ -554,7 +557,7 @@ function check_pm(product_matrix, basis, twisted=false)
    if idx != nothing
       @warn("Product is not supported on basis")
       i,j = Tuple(idx)
-      x = (twisted ? inv(basis[i]) : basis[i])
+      x = (twisted ? star(basis[i]) : basis[i])
       throw(KeyError(x*basis[j]))
    end
    return true
@@ -568,9 +571,9 @@ function complete!(RG::GroupRing, twisted::Bool=false)
    end
 
    warning = false
-   for idx in findall(RG.pm .== 0)
+   for idx in findall(iszero, RG.pm)
       i,j = Tuple(idx)
-      g = (twisted ? inv(RG.basis[i]) : RG.basis[i])*RG.basis[j]
+      g = (twisted ? star(RG.basis[i]) : RG.basis[i])*RG.basis[j]
       if haskey(RG.basis_dict, g)
           RG.pm[i,j] = RG.basis_dict[g]
       else
