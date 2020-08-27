@@ -457,7 +457,7 @@ end
 
 function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where T
    if check
-      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
+      parent(X) === parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
    if hasbasis(parent(X))
       result = parent(X)(similar(X.coeffs))
@@ -471,7 +471,7 @@ end
 
 function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T,S}
    if check
-      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
+      parent(X) === parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
 
    TT = typeof(first(X.coeffs)*first(Y.coeffs))
