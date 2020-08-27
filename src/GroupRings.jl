@@ -21,7 +21,7 @@ mutable struct GroupRing{Gr<:GroupOrNCRing, T<:GroupOrNCRingElem} <: NCRing
    group::Gr
    basis::Vector{T}
    basis_dict::Dict{T, Int}
-   pm::Array{Int,2}
+   pm::Matrix{Int}
 
    function GroupRing(G::Gr, basis::Vector{T};
          cachedmul::Bool=false) where {Gr, T}
@@ -75,7 +75,7 @@ function GroupRing(G::Generic.SymmetricGroup; cachedmul::Bool=false)
    return GroupRing(G, vec(collect(G)), cachedmul=cachedmul)
 end
 
-function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
+function GroupRing(G::Group, basis::AbstractVector, pm::AbstractMatrix{<:Integer})
    size(pm,1) == size(pm,2) || throw("pm must be square, got $(size(pm))")
    eltype(basis) == elem_type(G) || throw("Basis must consist of elements of $G")
    return GroupRing(G, basis, reverse_dict(basis), pm)
@@ -95,9 +95,7 @@ parent(g::GroupRingElem) = g.parent
 
 parent_type(X::GroupRingElem) = typeof(parent(X))
 
-import Base.promote_rule
-
-promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
+Base.promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
    GroupRingElem{promote_type(T,S)}
 
 function convert(::Type{T}, X::GroupRingElem) where T<:Number
@@ -297,16 +295,8 @@ function mul!(a::T, X::GroupRingElem{T}) where T
    return X
 end
 
-mul(a::T, X::GroupRingElem{T}) where T = GroupRingElem(a*X.coeffs, parent(X))
-
-function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S}
-   TT = promote_type(T,S)
-   TT == S || @warn("Scalar and coeffs are in different rings! Promoting result to $(TT)")
-   return GroupRingElem(a.*X.coeffs, parent(X))
-end
-
-(*)(a::Number, X::GroupRingElem) = mul(a, X)
-(*)(X::GroupRingElem, a::Number) = mul(a, X)
+Base.:*(a::Number, X::GroupRingElem) = GroupRingElem(a*X.coeffs, parent(X))
+Base.:*(X::GroupRingElem, a::Number) = a*X
 
 # disallow Rings to hijack *(::, ::GroupRingElem)
 *(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = mul(a, X)
@@ -425,7 +415,7 @@ function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    if isdefined(RG, :pm)
       s = size(RG.pm)
       k = findprev(!iszero, X.coeffs, lX)
-      (k == nothing ? 0 : k) <= s[1] || throw("Element in X outside of support of parents product")
+      (k == nothing ? 0 : k) <= s[1] || throw("Element in X outside of support of parents product: $k $(RG.basis[k])")
       k = findprev(!iszero, Y.coeffs, lY)
       (k == nothing ? 0 : k) <= s[2] || throw("Element in Y outside of support of parents product")
 
