@@ -257,9 +257,6 @@ end
 ###############################################################################
 
 function (==)(X::GroupRingElem, Y::GroupRingElem)
-   if eltype(X.coeffs) != eltype(Y.coeffs)
-      @warn("Comparing elements with different coeffs Rings!")
-   end
    suppX = supp(X)
    suppX == supp(Y) || return false
 
@@ -282,6 +279,9 @@ end
 
 hasbasis(A::GroupRing) = isdefined(A, :basis)
 
+Base.deepcopy_internal(x::GroupRingElem, dict::IdDict) =
+   parent(x)(deepcopy(x.coeffs))
+
 ###############################################################################
 #
 #   Scalar operators
@@ -295,11 +295,13 @@ function mul!(a::T, X::GroupRingElem{T}) where T
    return X
 end
 
-Base.:*(a::Number, X::GroupRingElem) = GroupRingElem(a*X.coeffs, parent(X))
+_mul(a::Number, X::GroupRingElem) = GroupRingElem(a*X.coeffs, parent(X))
+
+Base.:*(a::Number, X::GroupRingElem) = _mul(a, X)
 Base.:*(X::GroupRingElem, a::Number) = a*X
 
 # disallow Rings to hijack *(::, ::GroupRingElem)
-*(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = mul(a, X)
+*(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = _mul(a, X)
 
 (/)(X::GroupRingElem, a) = 1/a*X
 (//)(X::GroupRingElem, a::Union{Integer, Rational}) = 1//a*X
@@ -317,21 +319,8 @@ function addeq!(X::GroupRingElem, Y::GroupRingElem)
    return X
 end
 
-function +(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T
-   return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
-end
-
-function +(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
-   @warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
-   return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
-end
-
--(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T = addeq!((-Y), X)
-
-function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
-   @warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
-   addeq!((-Y), X)
-end
+Base.:+(X::GroupRingElem, Y::GroupRingElem) = addeq!(deepcopy(X), Y)
+-(X::GroupRingElem, Y::GroupRingElem) where T = addeq!((-Y), X)
 
 """
     fmac!(result::AbstractVector{T},
@@ -445,34 +434,18 @@ function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    return result
 end
 
-function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where T
-   if check
-      parent(X) === parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
-   end
-   if hasbasis(parent(X))
-      result = parent(X)(similar(X.coeffs))
-      result = mul!(result, X, Y)
-   else
-      result = GRmul!(similar(X.coeffs), X.coeffs, Y.coeffs, parent(X).pm)
-      result = GroupRingElem(result, parent(X))
-   end
-   return result
-end
-
 function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T,S}
    if check
       parent(X) === parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
 
-   TT = typeof(first(X.coeffs)*first(Y.coeffs))
-   @warn("Multiplying elements with different base rings! Promoting the result to $TT.")
+   TT = promote_type(T,S)
 
    if hasbasis(parent(X))
-      result = parent(X)(similar(X.coeffs))
-      result = convert(TT, result)
+      result = parent(X)(similar(X.coeffs, TT))
       result = mul!(result, X, Y)
    else
-      result = convert(TT, similar(X.coeffs))
+      result = similar(X.coeffs, TT)
       result = RGmul!(result, X.coeffs, Y.coeffs, parent(X).pm)
       result = GroupRingElem(result, parent(X))
    end
