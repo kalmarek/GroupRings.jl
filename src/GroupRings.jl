@@ -21,7 +21,7 @@ mutable struct GroupRing{Gr<:GroupOrNCRing, T<:GroupOrNCRingElem} <: NCRing
    group::Gr
    basis::Vector{T}
    basis_dict::Dict{T, Int}
-   pm::Array{Int,2}
+   pm::Matrix{Int}
 
    function GroupRing(G::Gr, basis::Vector{T};
          cachedmul::Bool=false) where {Gr, T}
@@ -75,7 +75,7 @@ function GroupRing(G::Generic.SymmetricGroup; cachedmul::Bool=false)
    return GroupRing(G, vec(collect(G)), cachedmul=cachedmul)
 end
 
-function GroupRing(G::Group, basis::Vector, pm::Array{Int,2})
+function GroupRing(G::Group, basis::AbstractVector, pm::AbstractMatrix{<:Integer})
    size(pm,1) == size(pm,2) || throw("pm must be square, got $(size(pm))")
    eltype(basis) == elem_type(G) || throw("Basis must consist of elements of $G")
    return GroupRing(G, basis, reverse_dict(basis), pm)
@@ -95,9 +95,7 @@ parent(g::GroupRingElem) = g.parent
 
 parent_type(X::GroupRingElem) = typeof(parent(X))
 
-import Base.promote_rule
-
-promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
+Base.promote_rule(::Type{GroupRingElem{T}}, ::Type{GroupRingElem{S}}) where {T,S} =
    GroupRingElem{promote_type(T,S)}
 
 function convert(::Type{T}, X::GroupRingElem) where T<:Number
@@ -259,9 +257,6 @@ end
 ###############################################################################
 
 function (==)(X::GroupRingElem, Y::GroupRingElem)
-   if eltype(X.coeffs) != eltype(Y.coeffs)
-      @warn("Comparing elements with different coeffs Rings!")
-   end
    suppX = supp(X)
    suppX == supp(Y) || return false
 
@@ -284,6 +279,9 @@ end
 
 hasbasis(A::GroupRing) = isdefined(A, :basis)
 
+Base.deepcopy_internal(x::GroupRingElem, dict::IdDict) =
+   parent(x)(deepcopy(x.coeffs))
+
 ###############################################################################
 #
 #   Scalar operators
@@ -297,19 +295,13 @@ function mul!(a::T, X::GroupRingElem{T}) where T
    return X
 end
 
-mul(a::T, X::GroupRingElem{T}) where T = GroupRingElem(a*X.coeffs, parent(X))
+_mul(a::Number, X::GroupRingElem) = GroupRingElem(a*X.coeffs, parent(X))
 
-function mul(a::T, X::GroupRingElem{S}) where {T<:Number, S}
-   TT = promote_type(T,S)
-   TT == S || @warn("Scalar and coeffs are in different rings! Promoting result to $(TT)")
-   return GroupRingElem(a.*X.coeffs, parent(X))
-end
-
-(*)(a::Number, X::GroupRingElem) = mul(a, X)
-(*)(X::GroupRingElem, a::Number) = mul(a, X)
+Base.:*(a::Number, X::GroupRingElem) = _mul(a, X)
+Base.:*(X::GroupRingElem, a::Number) = a*X
 
 # disallow Rings to hijack *(::, ::GroupRingElem)
-*(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = mul(a, X)
+*(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = _mul(a, X)
 
 (/)(X::GroupRingElem, a) = 1/a*X
 (//)(X::GroupRingElem, a::Union{Integer, Rational}) = 1//a*X
@@ -327,21 +319,8 @@ function addeq!(X::GroupRingElem, Y::GroupRingElem)
    return X
 end
 
-function +(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T
-   return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
-end
-
-function +(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
-   @warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
-   return GroupRingElem(X.coeffs+Y.coeffs, parent(X))
-end
-
--(X::GroupRingElem{T}, Y::GroupRingElem{T}) where T = addeq!((-Y), X)
-
-function -(X::GroupRingElem{S}, Y::GroupRingElem{T}) where {S, T}
-   @warn("Adding elements with different coefficient rings, Promoting result to $(promote_type(T,S))")
-   addeq!((-Y), X)
-end
+Base.:+(X::GroupRingElem, Y::GroupRingElem) = addeq!(deepcopy(X), Y)
+-(X::GroupRingElem, Y::GroupRingElem) where T = addeq!((-Y), X)
 
 """
     fmac!(result::AbstractVector{T},
@@ -425,7 +404,7 @@ function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    if isdefined(RG, :pm)
       s = size(RG.pm)
       k = findprev(!iszero, X.coeffs, lX)
-      (k == nothing ? 0 : k) <= s[1] || throw("Element in X outside of support of parents product")
+      (k == nothing ? 0 : k) <= s[1] || throw("Element in X outside of support of parents product: $k $(RG.basis[k])")
       k = findprev(!iszero, Y.coeffs, lY)
       (k == nothing ? 0 : k) <= s[2] || throw("Element in Y outside of support of parents product")
 
@@ -455,34 +434,18 @@ function mul!(result::GroupRingElem, X::GroupRingElem, Y::GroupRingElem)
    return result
 end
 
-function *(X::GroupRingElem{T}, Y::GroupRingElem{T}, check::Bool=true) where T
-   if check
-      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
-   end
-   if hasbasis(parent(X))
-      result = parent(X)(similar(X.coeffs))
-      result = mul!(result, X, Y)
-   else
-      result = GRmul!(similar(X.coeffs), X.coeffs, Y.coeffs, parent(X).pm)
-      result = GroupRingElem(result, parent(X))
-   end
-   return result
-end
-
 function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T,S}
    if check
-      parent(X) == parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
+      parent(X) === parent(Y) || throw("Elements don't seem to belong to the same Group Ring!")
    end
 
-   TT = typeof(first(X.coeffs)*first(Y.coeffs))
-   @warn("Multiplying elements with different base rings! Promoting the result to $TT.")
+   TT = promote_type(T,S)
 
    if hasbasis(parent(X))
-      result = parent(X)(similar(X.coeffs))
-      result = convert(TT, result)
+      result = parent(X)(similar(X.coeffs, TT))
       result = mul!(result, X, Y)
    else
-      result = convert(TT, similar(X.coeffs))
+      result = similar(X.coeffs, TT)
       result = RGmul!(result, X.coeffs, Y.coeffs, parent(X).pm)
       result = GroupRingElem(result, parent(X))
    end
@@ -501,12 +464,15 @@ function star(X::GroupRingElem{T}) where T
    result = RG(T)
    for (i,c) in enumerate(X.coeffs)
       if c != zero(T)
-         g = inv(RG.basis[i])
+         g = star(RG.basis[i])
          result[g] = c
       end
    end
    return result
 end
+
+star(g::GroupElem) = inv(g)
+star(r::NCRingElem) = inv(r)
 
 ###############################################################################
 #
@@ -535,7 +501,7 @@ function create_pm(basis::AbstractVector{T}, basis_dict::Dict{T, Int},
    Threads.@threads for i in 1:limit
       x = basis[i]
       if twisted
-         x = inv(x)
+         x = star(x)
       end
       for j in 1:limit
          product_matrix[i,j] = get(basis_dict, x*basis[j], 0)
@@ -554,7 +520,7 @@ function check_pm(product_matrix, basis, twisted=false)
    if idx != nothing
       @warn("Product is not supported on basis")
       i,j = Tuple(idx)
-      x = (twisted ? inv(basis[i]) : basis[i])
+      x = (twisted ? star(basis[i]) : basis[i])
       throw(KeyError(x*basis[j]))
    end
    return true
@@ -568,9 +534,9 @@ function complete!(RG::GroupRing, twisted::Bool=false)
    end
 
    warning = false
-   for idx in findall(RG.pm .== 0)
+   for idx in findall(iszero, RG.pm)
       i,j = Tuple(idx)
-      g = (twisted ? inv(RG.basis[i]) : RG.basis[i])*RG.basis[j]
+      g = (twisted ? star(RG.basis[i]) : RG.basis[i])*RG.basis[j]
       if haskey(RG.basis_dict, g)
           RG.pm[i,j] = RG.basis_dict[g]
       else
