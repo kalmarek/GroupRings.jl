@@ -16,6 +16,7 @@ matrix:
     - julia: nightly
 
 script:
-  - julia -e 'using Pkg; pkg"add https://github.com/kalmarek/Groups.jl"; Pkg.build(); Pkg.test(coverage=true);'
+  - julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/kalmarek/Groups.jl")); Pkg.build(); Pkg.test(coverage=true);'
+  - julia --color=yes -e "if VERSION < v\"0.7.0-DEV.5183\"; cd(Pkg.dir(\"${JL_PKG}\")); else using Pkg; end; Pkg.add(\"Coverage\"); using Coverage; Codecov.submit(process_folder())"
 
 codecov: true
