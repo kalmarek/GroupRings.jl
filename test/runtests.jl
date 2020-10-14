@@ -49,7 +49,7 @@ using SparseArrays
       S = gens(F)
       append!(S, [inv(s) for s in S])
 
-      basis, sizes = Groups.generate_balls(S, one(F), radius=4)
+      basis, sizes = Groups.wlmetric_ball(S, one(F), radius=4)
       d = GroupRings.reverse_dict(basis)
       @test_throws KeyError create_pm(basis)
       pm = create_pm(basis, d, sizes[2])
@@ -120,7 +120,7 @@ using SparseArrays
          E(M, i,j) = (e_ij = one(M); e_ij[i,j] = 1; e_ij)
          S = [E(M, i,j) for i in 1:N for j in 1:N if i≠j]
          S = unique([S; inv.(S)])
-         E_R, sizes = Groups.generate_balls(S, radius=2*halfradius)
+         E_R, sizes = Groups.wlmetric_ball(S, radius=2*halfradius)
          E_rdict = GroupRings.reverse_dict(E_R)
          pm = GroupRings.create_pm(E_R, E_rdict, sizes[halfradius]; twisted=true);
 
@@ -260,7 +260,7 @@ using SparseArrays
 
       ID = one(G)
       RADIUS=3
-      @time E_R, sizes = Groups.generate_balls(S, ID, radius=2*RADIUS);
+      @time E_R, sizes = Groups.wlmetric_ball(S, ID, radius=2*RADIUS);
       @test sizes == [9, 65, 457, 3201, 22409, 156865]
       E_rdict = GroupRings.reverse_dict(E_R)
       pm = GroupRings.create_pm(E_R, E_rdict, sizes[RADIUS]; twisted=true);
