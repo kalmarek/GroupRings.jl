@@ -295,10 +295,10 @@ function mul!(a::T, X::GroupRingElem{T}) where T
    return X
 end
 
-_mul(a::Number, X::GroupRingElem) = GroupRingElem(a*X.coeffs, parent(X))
+_mul(a::Number, X::GroupRingElem) = GroupRingElem(a.*X.coeffs, parent(X))
 
 Base.:*(a::Number, X::GroupRingElem) = _mul(a, X)
-Base.:*(X::GroupRingElem, a::Number) = a*X
+Base.:*(X::GroupRingElem, a::Number) = _mul(a, X)
 
 # disallow Rings to hijack *(::, ::GroupRingElem)
 *(a::Union{AbstractFloat, Integer, RingElem, Rational}, X::GroupRingElem) = _mul(a, X)
@@ -446,7 +446,7 @@ function *(X::GroupRingElem{T}, Y::GroupRingElem{S}, check::Bool=true) where {T,
       result = mul!(result, X, Y)
    else
       result = similar(X.coeffs, TT)
-      result = RGmul!(result, X.coeffs, Y.coeffs, parent(X).pm)
+      result = GRmul!(result, X.coeffs, Y.coeffs, parent(X).pm)
       result = GroupRingElem(result, parent(X))
    end
    return result
