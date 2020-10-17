@@ -203,13 +203,13 @@ Base.IndexStyle(::Type{GroupRingElem}) = Base.LinearFast()
 dense(X::GroupRingElem{T, A}) where {T, A<:DenseVector} = X
 
 function dense(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector}
-   return parent(X)(Vector(X.coeffs))
+   return GroupRingElem(Vector(X.coeffs), parent(X))
 end
 
 SparseArrays.sparse(X::GroupRingElem{T, Sp}) where {T, Sp<:SparseVector} = X
 
 function SparseArrays.sparse(X::GroupRingElem{T, A}) where {T, A<:Vector}
-   return parent(X)(sparse(X.coeffs))
+   return GroupRingElem(sparse(X.coeffs), parent(X))
 end
 
 ###############################################################################
@@ -280,7 +280,7 @@ end
 hasbasis(A::GroupRing) = isdefined(A, :basis)
 
 Base.deepcopy_internal(x::GroupRingElem, dict::IdDict) =
-   parent(x)(deepcopy(x.coeffs))
+   GroupRingElem(deepcopy(x.coeffs), parent(x))
 
 ###############################################################################
 #
