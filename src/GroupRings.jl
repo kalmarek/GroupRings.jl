@@ -569,6 +569,7 @@ module New
 include("bases.jl")
 
 include("mstructures.jl")
+include("mtables.jl")
 
 end
 
