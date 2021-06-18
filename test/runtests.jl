@@ -12,6 +12,7 @@ using GroupRings.New
 
    include("constructors.jl")
    include("cachedmtables.jl")
+   include("arithmetic.jl")
 end
 
 @testset "GroupRings" begin

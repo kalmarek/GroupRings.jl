@@ -575,6 +575,7 @@ include("mtables.jl")
 
 include("types.jl")
 include("algebra_elts.jl")
+include("arithmetic.jl")
 include("show.jl")
 
 end
