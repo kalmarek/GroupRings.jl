@@ -563,4 +563,9 @@ function initializepm!(RG::GroupRing; fill::Bool=false)
    return RG
 end
 
+
+module New
+include("bases.jl")
+end
+
 end # of module GroupRings
