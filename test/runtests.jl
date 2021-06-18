@@ -13,6 +13,7 @@ using GroupRings.New
    include("constructors.jl")
    include("cachedmtables.jl")
    include("arithmetic.jl")
+   include("sum_of_squares.jl")
 end
 
 @testset "GroupRings" begin
