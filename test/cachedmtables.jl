@@ -30,3 +30,33 @@
     @test tmstr[3, 2] == b[inv(b[3])*b[2]]
 end
 
+@testset "Group Algebra caching" begin
+    G = SymmetricGroup(3)
+    b = New.Basis{UInt8}(collect(G))
+    l = length(b)
+
+    RG = New.StarAlgebra(G, b, (l, l))
+    @test RG isa New.StarAlgebra
+
+    D = ((l + 1) * one(RG) - sum(RG(g) for g in b)) // 6
+    @test D isa New.AlgebraElement
+    g = RG(b[1])
+    @test isone(g)
+    @test one(RG) == g
+    @test iszero(zero(RG))
+    @test 0 * g == zero(RG)
+    @test iszero(0 * g)
+
+    h = RG(b[3])
+
+    @test D * one(RG) == D
+
+    @test all(New.supp(D) .== b)
+
+    @test one(RG) * D == D
+    @test any(iszero, RG.mstructure.table)
+
+    @test D * D isa New.AlgebraElement
+
+    @test all(!iszero, RG.mstructure.table)
+end

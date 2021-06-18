@@ -10,6 +10,7 @@ using GroupRings.New
 
    New.star(p::Generic.Perm) = inv(p)
 
+   include("constructors.jl")
    include("cachedmtables.jl")
 end
 
