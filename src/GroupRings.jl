@@ -565,7 +565,11 @@ end
 
 
 module New
+
 include("bases.jl")
+
+include("mstructures.jl")
+
 end
 
 end # of module GroupRings
