@@ -4,6 +4,14 @@ using AbstractAlgebra
 using GroupRings
 using SparseArrays
 
+using GroupRings.New
+
+@testset "StarAlgebras" begin
+
+   New.star(p::Generic.Perm) = inv(p)
+
+   include("cachedmtables.jl")
+end
 
 @testset "GroupRings" begin
    @testset "Constructors: SymmetricGroup" begin

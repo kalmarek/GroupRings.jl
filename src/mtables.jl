@@ -71,3 +71,83 @@ Base.@propagate_inbounds function Base.getindex(m::MTable, i::Integer, j::Intege
     return m.table[i, j]
 end
 
+## CachedMTables
+
+struct CachedMTable{T,I,B<:Basis{T,I},M,Twisted} <: AbstractMTable{I,Twisted}
+    basis::B
+    table::M
+end
+
+function CachedMTable{Tw}(
+    basis::AbstractBasis{T,I};
+    table_size = (l = length(basis); (l, l)),
+) where {Tw,T,I}
+    return CachedMTable{Tw}(basis, zeros(I, table_size))
+end
+
+function CachedMTable{Tw}(basis::AbstractBasis{T,I}, mt::AbstractMatrix{I}) where {Tw,T,I}
+    return CachedMTable{T,I,typeof(basis),typeof(mt),Tw}(basis, mt)
+end
+
+function CachedMTable{Tw}(
+    basis::AbstractVector;
+    table_size = (l = length(basis); (l, l)),
+) where {Tw}
+    b = Basis{UInt32}(basis)
+    cmt = zeros(UInt32, table_size)
+    return CachedMTable{Tw}(b, cmt)
+end
+
+basis(m::CachedMTable) = m.basis
+
+Base.@propagate_inbounds function Base.getindex(cmt::CachedMTable, i::Integer, j::Integer)
+    cache!(cmt, i, j)
+    return cmt.table[i, j]
+end
+
+Base.@propagate_inbounds function cache!(cmt::CachedMTable, i::Integer, j::Integer)
+    @boundscheck checkbounds(cmt, i, j)
+    if !_iscached(cmt, i, j)
+        b = basis(cmt)
+        g, h = b[i], b[j]
+        @debug "Caching $i, $j" g h
+        gh = _product(cmt, g, h)
+        gh in b || throw(ProductNotDefined(i, j, "$g · $h = $gh"))
+        cmt.table[i, j] = b[gh]
+    end
+    return cmt
+end
+
+Base.@propagate_inbounds function cache!(
+    cmt::CachedMTable{T,I,B,M,false},
+    suppX::AbstractVector{<:Integer},
+    suppY::AbstractVector{<:Integer},
+) where {T,I,B,M}
+    Threads.@threads for j in suppY
+        for i in suppX
+            if !_iscached(cmt, i, j)
+                cache!(cmt, i, j)
+            end
+        end
+    end
+    return cmt
+end
+
+Base.@propagate_inbounds function cache!(
+    cmt::CachedMTable{T,I,B,M,true},
+    suppX::AbstractVector{<:Integer},
+    suppY::AbstractVector{<:Integer},
+) where {T,I,B,M}
+    b = basis(cmt)
+    Threads.@threads for i in suppX
+        g = star(b[i])
+        for j in suppY
+            if !_iscached(cmt, i, j)
+                gh = _product(Val(false), g, b[j])
+                gh in b || throw(ProductNotDefined(i, j, "$g · $h = $gh"))
+                cmt.table[i, j] = b[gh]
+            end
+        end
+    end
+    return cmt
+end
