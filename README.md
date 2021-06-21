@@ -1,3 +1,6 @@
+# StarAlgebras.jl
+This package was superseeded by [StarAlgebras.jl](https://github.com/kalmarek/StarAlgebras.jl) and as of 21st June 2021 is unmaintained.
+
 # GroupRings
 
 [![Build Status](https://travis-ci.org/kalmarek/GroupRings.jl.svg?branch=master)](https://travis-ci.org/kalmarek/GroupRings.jl)
